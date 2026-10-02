@@ -78,7 +78,11 @@ export default async function MentorApplyPage() {
       )}
 
       <div className="mt-6">
-        <MentorApplicationForm initial={application ?? EMPTY_APPLICATION} />
+        <MentorApplicationForm
+          initial={application ?? EMPTY_APPLICATION}
+          name={user?.name ?? 'You'}
+          avatarUrl={user?.avatarUrl}
+        />
       </div>
     </div>
   )

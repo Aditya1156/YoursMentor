@@ -43,7 +43,11 @@ export default async function MentorProfilePage() {
       </Card>
 
       <div className="mt-5">
-        <MentorApplicationForm initial={profile ?? EMPTY_APPLICATION} />
+        <MentorApplicationForm
+          initial={profile ?? EMPTY_APPLICATION}
+          name={user?.name ?? 'You'}
+          avatarUrl={user?.avatarUrl}
+        />
       </div>
     </div>
   )

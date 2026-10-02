@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Checkbox, Field, Input } from '@/components/ui/input'
 import { ErrorBanner } from '@/components/auth/error-banner'
+import { AvatarUpload } from '@/components/shared/avatar-upload'
 import { createClient } from '@/lib/supabase/client'
 import { TIER_LABEL, TRACK_LONG, type Track } from '@/lib/types'
 import type { MentorApplication } from '@/lib/queries/mentor'
@@ -24,7 +25,13 @@ const TRACKS: Track[] = ['first_job', 'abroad']
 const MAX_UPLOAD = 5 * 1024 * 1024
 const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
 
-export function MentorApplicationForm({ initial }: { initial: MentorApplication }) {
+export function MentorApplicationForm({
+  initial, name = 'You', avatarUrl,
+}: {
+  initial: MentorApplication
+  name?: string
+  avatarUrl?: string
+}) {
   const router = useRouter()
   const [a, setA] = useState(initial)
   const [agreed, setAgreed] = useState(false)
@@ -150,6 +157,15 @@ export function MentorApplicationForm({ initial }: { initial: MentorApplication 
       {error && <ErrorBanner>{error}</ErrorBanner>}
 
       <Section title="About you" hint="This is what students read first.">
+        <div>
+          <p className="mb-2 text-sm font-semibold">Your photo</p>
+          <AvatarUpload name={name} currentUrl={avatarUrl} size="lg" />
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+            Students pick mentors who look like someone they could actually talk to. A
+            plain photo of your face does more than anything else on this page.
+          </p>
+        </div>
+
         <Field label="Headline" htmlFor="headline" required
                hint="e.g. Software Engineer at PhonePe">
           <Input id="headline" value={a.headline} maxLength={120}

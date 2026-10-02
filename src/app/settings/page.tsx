@@ -16,7 +16,7 @@ export default async function SettingsPage() {
   const { data: profile } = await supabase
     .from('profiles')
     .select(
-      'name, college, college_tier, branch, graduation_year, home_state, languages, first_gen_graduate, goals, email_preferences, deleted_at'
+      'name, avatar_url, college, college_tier, branch, graduation_year, home_state, languages, first_gen_graduate, goals, email_preferences, deleted_at'
     )
     .eq('id', user.id)
     .single()
@@ -33,6 +33,7 @@ export default async function SettingsPage() {
       <div className="mt-6">
         <SettingsPanels
           email={authUser?.email ?? ''}
+          avatarUrl={profile?.avatar_url ?? undefined}
           isGoogleOnly={
             (authUser?.app_metadata?.providers ?? []).includes('google') &&
             !(authUser?.app_metadata?.providers ?? []).includes('email')

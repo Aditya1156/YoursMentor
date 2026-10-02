@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Checkbox, Field, Input, PasswordInput } from '@/components/ui/input'
 import { ErrorBanner } from '@/components/auth/error-banner'
+import { AvatarUpload } from '@/components/shared/avatar-upload'
 import { createClient } from '@/lib/supabase/client'
 import { TIER_LABEL } from '@/lib/types'
 import { passwordField } from '@/lib/validation'
@@ -42,10 +43,11 @@ interface Profile {
 interface Prefs { reminders: boolean; summaries: boolean; product_news: boolean }
 
 export function SettingsPanels({
-  email, isGoogleOnly, profile, emailPreferences, deletionRequestedAt,
+  email, isGoogleOnly, avatarUrl, profile, emailPreferences, deletionRequestedAt,
 }: {
   email: string
   isGoogleOnly: boolean
+  avatarUrl?: string
   profile: Profile
   emailPreferences: Prefs
   deletionRequestedAt: string | null
@@ -174,6 +176,8 @@ export function SettingsPanels({
         <p className="-mt-2 text-xs text-muted-foreground">
           These drive your matches, so keeping them current changes who you see.
         </p>
+
+        <AvatarUpload name={p.name} currentUrl={avatarUrl} />
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Name" htmlFor="name" required>
