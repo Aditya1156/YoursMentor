@@ -160,7 +160,7 @@ export function SignUpForm({ role }: { role: 'student' | 'mentor' }) {
           label="Date of birth"
           htmlFor="dateOfBirth"
           error={errors.dateOfBirth}
-          hint="OneStep is open to 18+ only for now."
+          hint="YoursMentor is open to 18+ only for now."
           required
         >
           <Input

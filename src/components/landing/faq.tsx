@@ -15,10 +15,10 @@ const FAQS = [
   },
   {
     q: 'Do I need to install Zoom or Google Meet?',
-    a: 'No. Every session runs inside OneStep in your browser — Chrome or Edge on a phone or laptop is enough. There is an audio-only mode for weak mobile data, and we never ask you to move to a mentor’s personal link.',
+    a: 'No. Every session runs inside YoursMentor in your browser — Chrome or Edge on a phone or laptop is enough. There is an audio-only mode for weak mobile data, and we never ask you to move to a mentor’s personal link.',
   },
   {
-    q: 'How are mentors vetted on OneStep?',
+    q: 'How are mentors vetted on YoursMentor?',
     a: 'Mentors are invite-only right now. Every applicant is reviewed by a person against their LinkedIn profile and a college or company ID before they can be listed, and each one signs our code of conduct. The verified badge on a profile means a human checked it.',
   },
   {
@@ -31,11 +31,11 @@ const FAQS = [
   },
   {
     q: 'What is your refund and cancellation policy?',
-    a: 'Cancel 24 hours or more before a session and you get the full amount back as OneStep credits. Under 24 hours there is no refund. If the mentor cancels, or a group session does not reach its minimum of 3 students, you are refunded in full automatically.',
+    a: 'Cancel 24 hours or more before a session and you get the full amount back as YoursMentor credits. Under 24 hours there is no refund. If the mentor cancels, or a group session does not reach its minimum of 3 students, you are refunded in full automatically.',
   },
   {
     q: 'Who can sign up?',
-    a: 'OneStep is open to students aged 18 and over for now. We are building a proper parental-consent flow before we open to younger students, because India’s data protection law requires it.',
+    a: 'YoursMentor is open to students aged 18 and over for now. We are building a proper parental-consent flow before we open to younger students, because India’s data protection law requires it.',
   },
   {
     q: 'How do I become a mentor?',

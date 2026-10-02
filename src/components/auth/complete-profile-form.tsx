@@ -87,7 +87,7 @@ export function CompleteProfileForm({ next }: { next?: string }) {
         label="Date of birth"
         htmlFor="dateOfBirth"
         error={errors.dateOfBirth}
-        hint="OneStep is open to 18+ only for now."
+        hint="YoursMentor is open to 18+ only for now."
         required
       >
         <Input

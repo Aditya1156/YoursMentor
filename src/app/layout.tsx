@@ -11,16 +11,26 @@ const jakarta = Plus_Jakarta_Sans({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://yoursmentor.in'),
   title: {
-    default: 'OneStep — Learn from someone who was where you are',
-    template: '%s · OneStep',
+    default: 'YoursMentor.in — Know What to Do Next.',
+    template: '%s · YoursMentor.in',
   },
   description:
-    'OneStep connects students from Tier-2 and Tier-3 colleges with near-peer mentors who were exactly where they are. ₹99 group sessions and affordable 1:1 guidance.',
+    'YoursMentor.in connects students from Tier-2 and Tier-3 colleges with near-peer mentors who were exactly where they are. ₹99 group sessions and affordable 1:1 guidance.',
+  icons: { icon: '/brand/mark.png', apple: '/brand/mark.png' },
+  openGraph: {
+    type: 'website',
+    siteName: 'YoursMentor.in',
+    title: 'YoursMentor.in — Know What to Do Next.',
+    description:
+      'Book ₹99 group sessions and 1:1 calls with seniors from Tier-2 and Tier-3 colleges who already did what you are trying to do.',
+    images: ['/brand/logo-horizontal.png'],
+  },
 }
 
 export const viewport: Viewport = {
-  themeColor: '#2E2A9E',
+  themeColor: '#0069EE',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -33,7 +33,7 @@ export function AuthCard({
 
         <p className="mt-5 flex items-center justify-center gap-1.5 text-xs text-subtle-foreground">
           <ShieldCheck className="size-3.5" aria-hidden />
-          OneStep is 18+ only right now.{' '}
+          YoursMentor is 18+ only right now.{' '}
           <Link href="/privacy" className="font-semibold text-primary hover:underline">
             Privacy
           </Link>

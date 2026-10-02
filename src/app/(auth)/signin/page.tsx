@@ -30,7 +30,7 @@ export default async function SignInPage({
       subtitle="Sign in to see your upcoming sessions and book your next one."
       footer={
         <>
-          New to OneStep?{' '}
+          New to YoursMentor?{' '}
           <Link href="/signup" className="font-semibold text-primary hover:underline">
             Create an account
           </Link>

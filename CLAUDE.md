@@ -1,4 +1,6 @@
-# OneStep — near-peer mentorship platform
+# YoursMentor.in — near-peer mentorship platform
+
+> *Know What to Do Next.*
 
 **The product spec lives in [`docs/MASTER_PROMPT.md`](docs/MASTER_PROMPT.md). Read it
 before building any page.** This file holds the stack as actually built, what the spec
@@ -77,13 +79,22 @@ exposed to Tailwind through `@theme inline`.
 **Never hardcode a colour, radius or font.** Use the semantic token (`bg-surface`,
 `text-muted-foreground`, `rounded-[var(--radius-lg)]`).
 
-**The brand rule:** amber (`--cta-group`) means ₹99 group session. Indigo (`--cta-1on1`,
+Brand assets live in `public/brand/`: `mark.png` (the YM figure), `wordmark.png`,
+`logo-horizontal.png` and `logo-stacked.png`. The navbar and footer use the mark plus a
+live-text wordmark — "yours" in navy, "mentor.in" in brand blue — so it stays crisp and
+reflows at 360px. Use the raster lockups for emails and social cards.
+
+**The brand rule:** amber (`--cta-group`) means ₹99 group session. Blue (`--cta-1on1`,
 also `--primary`) means paid 1:1 and every other primary action. Choose
 `<Button variant="group">` vs `<Button variant="primary">` by what the button books, not
 by how it looks. A student should tell the two paths apart without reading.
 
 Section labels use `.eyebrow`. Page bodies sit inside `.container-page` (16px gutter at
 360px, 1240px max).
+
+**Every colour pair in the token set is verified against WCAG AA** (4.5:1 for text, 3:1
+for large/secondary). If you add a token, check it before shipping — three values were
+already pulled back for failing: the brand amber, its hover, and the success green.
 
 ---
 
@@ -120,6 +131,9 @@ so it is the only path that lands on `/complete-profile`.
 | `breakthrough_story` is its own column | The designs make it a distinct quoted block on every mentor card, not part of the bio. |
 | `trial_offer` flag on `mentor_profiles` | The designs show a "Book ₹99 Trial" amber CTA on one mentor. That is a flag, not a price check. |
 | Credits chip in the navbar | Spec §6 has a credit ledger but never surfaces the balance. The designs put it in the navbar. |
+| **Renamed OneStep → YoursMentor.in**, palette rebuilt from the supplied logo | 2026-10-02. Indigo/amber became blue/navy/cyan + amber, sampled from the artwork's own fills. |
+| Amber kept for the ₹99 path after the rebrand | The logo is one blue family, cyan to navy. Two blues cannot tell the group and 1:1 paths apart at a glance on a cheap screen, and that distinction is the pricing model. Reasoning is written into `tokens.css`. |
+| Brand amber darkened `#B8780A` → `#9C6408`, success green `#1F8A4C` → `#1A7A43` | White on the original amber was 3.67:1 and the green read 3.90:1 on its own badge — both under AA. The ₹99 button is the product's main CTA. |
 | DOB travels in sign-up metadata, not browser storage | A confirmation email is often opened on a different device from the sign-up. Browser storage breaks there; metadata does not. |
 
 ## Where the designs and the spec disagree, the designs win

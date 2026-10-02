@@ -1,4 +1,4 @@
-# MASTER PROMPT — OneStep (Near-Peer Mentorship Platform)
+# MASTER PROMPT — YoursMentor (Near-Peer Mentorship Platform)
 
 > Placeholders resolved 2026-10-02. Design tokens in Section 4 are derived from
 > the approved UI/UX designs and implemented in `client/src/styles/tokens.css`.
@@ -13,7 +13,7 @@
 
 ## 1. Product in one paragraph
 
-OneStep connects students from Tier-2/3 colleges with **near-peer mentors**: people just 1–3 steps ahead of them, from similar backgrounds (college tier, home state, language, first-generation graduate). Students book **affordable group sessions (₹99)** or short **1:1 sessions**, pay online, and join a video call inside the website. Two tracks at launch:
+YoursMentor connects students from Tier-2/3 colleges with **near-peer mentors**: people just 1–3 steps ahead of them, from similar backgrounds (college tier, home state, language, first-generation graduate). Students book **affordable group sessions (₹99)** or short **1:1 sessions**, pay online, and join a video call inside the website. Two tracks at launch:
 
 - **Track 1 – First Job / Internship** (skills, resume, interviews, college life, career choices)
 - **Track 2 – Going Abroad** (mentors who moved abroad from middle-class backgrounds; experience only, no visa/legal advice)
@@ -132,7 +132,7 @@ VITE_LIVEKIT_URL=
 
 | Token | Value |
 |---|---|
-| Brand name / logo | OneStep / `client/src/components/shared/logo.tsx` (inline SVG, swap when final file lands) |
+| Brand name / logo | YoursMentor / `client/src/components/shared/logo.tsx` (inline SVG, swap when final file lands) |
 | Primary colour | `#2E2A9E` indigo-700 — 1:1 bookings and every non-₹99 primary action |
 | Secondary / accent | `#B8780A` amber-500 — reserved for ₹99 group sessions only |
 | Background (light / dark) | `#F7F8FC` / `#0D0E1C` (dark provisional — no dark comp exists yet) |
@@ -583,7 +583,7 @@ Under-18 users with verifiable parental consent · PAN/ID KYC and automated veri
 
 ## 15. Open items to fill before starting
 
-- [x] Platform name: **OneStep**
+- [x] Platform name: **YoursMentor**
 - [ ] Domain: {{DOMAIN}}
 - [x] Theme tokens (Section 4) — implemented in `client/src/styles/tokens.css`
 - [ ] Team names for Dev A–D (Section 11)

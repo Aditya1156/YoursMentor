@@ -106,7 +106,7 @@ const TRACKS = [
       },
     ],
     disclaimer:
-      'Peer advice only. OneStep mentors do not provide legal immigration or visa consulting.',
+      'Peer advice only. YoursMentor mentors do not provide legal immigration or visa consulting.',
   },
 ]
 
@@ -422,7 +422,7 @@ function FounderNote() {
                 product jobs were only meant for IITians. It was a complete lie.&rdquo;
               </p>
               <p>
-                &ldquo;OneStep was built with close friends for every student sitting in a
+                &ldquo;YoursMentor was built with close friends for every student sitting in a
                 hostel room right now who feels anxious, left out or invisible. You don’t
                 need a ₹50,000 bootcamp. You just need a senior who has travelled that exact
                 road to say:{' '}

@@ -1,4 +1,4 @@
--- OneStep — initial schema
+-- YoursMentor — initial schema
 -- Profiles, mentor profiles and the enums the rest of the product hangs off.
 -- Bookings, sessions, payments and credits land in later migrations as their
 -- pages are built (docs/MASTER_PROMPT.md §11).
