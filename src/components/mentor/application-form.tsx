@@ -115,6 +115,7 @@ export function MentorApplicationForm({
       breakthrough_story: a.breakthroughStory.trim(),
       current_position: a.currentPosition.trim() || null,
       company: a.company.trim() || null,
+      company_domain: a.companyDomain.trim() || null,
       country: a.country.trim() || 'India',
       college: a.college.trim() || null,
       college_tier: a.collegeTier || null,
@@ -208,6 +209,20 @@ export function MentorApplicationForm({
           <Field label="Company or university" htmlFor="company">
             <Input id="company" value={a.company}
                    onChange={(e) => set('company', e.target.value)} />
+          </Field>
+          <Field
+            label="Their website"
+            htmlFor="domain"
+            hint="Just the domain, e.g. phonepe.com. We use it to show their logo on your card."
+          >
+            <Input
+              id="domain" value={a.companyDomain} placeholder="phonepe.com"
+              onChange={(e) =>
+                set('companyDomain',
+                  e.target.value.trim().toLowerCase()
+                    .replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, ''))
+              }
+            />
           </Field>
           <Field label="Your college" htmlFor="college">
             <Input id="college" value={a.college}

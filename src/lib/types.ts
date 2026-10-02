@@ -38,6 +38,8 @@ export interface MentorSummary {
   avatarUrl?: string
   headline: string
   company?: string
+  /** Bare domain, e.g. phonepe.com. Drives the cached logo. */
+  companyDomain?: string
   collegeLine?: string
   collegeTier?: CollegeTier
   homeState?: string

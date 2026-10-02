@@ -43,42 +43,49 @@ export function MentorCard({
         className
       )}
     >
-      {/* the band, tinted by where they work */}
+      {/* The header carries who they are and where they work, tinted by the
+          company — which is what stops a grid of these reading as one wall. */}
       <div
-        className="h-16 w-full"
-        style={{ background: `linear-gradient(135deg, ${tone.bg}, transparent 140%)` }}
-        aria-hidden
-      />
+        className="relative flex items-center gap-3 p-4 sm:px-5"
+        style={{
+          background: `linear-gradient(135deg, ${tone.bg}, ${tone.bg}66 70%, transparent 130%)`,
+        }}
+      >
+        <span className="shrink-0 rounded-full ring-4 ring-surface transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100">
+          <Avatar name={mentor.name} src={mentor.avatarUrl} size={compact ? 'lg' : 'xl'} />
+        </span>
 
-      <div className="flex flex-1 flex-col gap-3 px-4 pb-4 sm:px-5 sm:pb-5">
-        <div className="-mt-9 flex items-end justify-between gap-3">
-          <span className="rounded-full ring-4 ring-surface transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100">
-            <Avatar name={mentor.name} src={mentor.avatarUrl} size={compact ? 'lg' : 'xl'} />
-          </span>
-          {mentor.ratingCount > 0 && (
-            <StarRating value={mentor.ratingAvg} count={mentor.ratingCount} className="mb-1" />
-          )}
-        </div>
-
-        <div>
-          <h3 className="flex items-center gap-1 text-base font-bold leading-tight">
-            <Link href={`/mentors/${mentor.id}`} className="hover:text-primary">
+        <div className="min-w-0 flex-1">
+          <h3 className="flex items-center gap-1 text-[1.0625rem] font-extrabold leading-tight tracking-tight">
+            <Link href={`/mentors/${mentor.id}`} className="truncate hover:underline">
               <span className="absolute inset-0" aria-hidden />
               {mentor.name}
             </Link>
-            <BadgeCheck className="size-4 shrink-0 text-primary" aria-label="Verified mentor" />
+            <BadgeCheck
+              className="size-4 shrink-0"
+              style={{ color: tone.fg }}
+              aria-label="Verified mentor"
+            />
           </h3>
-          <p className="mt-0.5 text-sm font-semibold leading-snug text-primary">
+          <p
+            className="mt-0.5 line-clamp-2-safe text-[0.8125rem] font-semibold leading-snug"
+            style={{ color: tone.fg }}
+          >
             {mentor.headline}
           </p>
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            <CompanyBadge company={mentor.company} domain={mentor.companyDomain} size="sm" />
+            {mentor.ratingCount > 0 && (
+              <StarRating value={mentor.ratingAvg} count={mentor.ratingCount} />
+            )}
+          </div>
         </div>
+      </div>
 
-        <div className="flex flex-wrap items-center gap-1.5">
-          <CompanyBadge company={mentor.company} />
-          {mentor.collegeLine && (
-            <span className="text-xs text-muted-foreground">{mentor.collegeLine}</span>
-          )}
-        </div>
+      <div className="flex flex-1 flex-col gap-3 px-4 pb-4 pt-3 sm:px-5 sm:pb-5">
+        {mentor.collegeLine && (
+          <p className="text-xs font-medium text-muted-foreground">{mentor.collegeLine}</p>
+        )}
 
         {mentor.matchReasons && <MatchReasonChips reasons={mentor.matchReasons} />}
 

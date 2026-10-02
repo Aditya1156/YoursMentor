@@ -8,6 +8,7 @@ const toMentor = (r: any): MentorSummary => ({
   avatarUrl: r.avatar_url ?? undefined,
   headline: r.headline,
   company: r.company ?? undefined,
+  companyDomain: r.company_domain ?? undefined,
   collegeLine: r.college_line ?? undefined,
   collegeTier: r.college_tier ?? undefined,
   homeState: r.home_state ?? undefined,

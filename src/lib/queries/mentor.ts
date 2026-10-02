@@ -7,6 +7,7 @@ export interface MentorApplication {
   breakthroughStory: string
   currentPosition: string
   company: string
+  companyDomain: string
   country: string
   college: string
   collegeTier: CollegeTier | ''
@@ -25,7 +26,7 @@ export interface MentorApplication {
 }
 
 export const EMPTY_APPLICATION: MentorApplication = {
-  headline: '', story: '', breakthroughStory: '', currentPosition: '', company: '',
+  headline: '', story: '', breakthroughStory: '', currentPosition: '', company: '', companyDomain: '',
   country: 'India', college: '', collegeTier: '', collegeLine: '', homeState: '',
   languages: [], firstGenGraduate: false, tracks: [], topics: [],
   linkedinUrl: '', idProofUrl: '', price1on1: 199, upiId: '',
@@ -50,6 +51,7 @@ export async function myMentorApplication(): Promise<MentorApplication | null> {
     breakthroughStory: data.breakthrough_story ?? '',
     currentPosition: data.current_position ?? '',
     company: data.company ?? '',
+    companyDomain: data.company_domain ?? '',
     country: data.country ?? 'India',
     college: data.college ?? '',
     collegeTier: data.college_tier ?? '',
