@@ -1,61 +1,113 @@
-/** Mirrors the Mongoose models in docs/MASTER_PROMPT.md §6, shaped for the UI. */
+/** Mirrors the database. snake_case comes off Supabase; the UI uses these. */
 
 export type CollegeTier = 'tier1' | 'tier2' | 'tier3' | 'other'
 export type Track = 'first_job' | 'abroad'
+export type SessionType = 'one_on_one' | 'group'
+export type SessionStatus = 'scheduled' | 'live' | 'completed' | 'cancelled'
+export type BookingStatus =
+  | 'held' | 'confirmed' | 'attended' | 'no_show_student'
+  | 'cancelled_by_student' | 'cancelled_by_mentor' | 'cancelled_auto' | 'refunded'
 
 export const TRACK_LABEL: Record<Track, string> = {
+  first_job: 'First Job / Internship',
+  abroad: 'Going Abroad',
+}
+export const TRACK_LONG: Record<Track, string> = {
   first_job: 'Track 1: First Job / Internship',
   abroad: 'Track 2: Going Abroad',
 }
-
 export const TIER_LABEL: Record<CollegeTier, string> = {
-  tier1: 'Tier-1',
-  tier2: 'Tier-2',
-  tier3: 'Tier-3',
-  other: 'Other',
+  tier1: 'Tier-1', tier2: 'Tier-2', tier3: 'Tier-3', other: 'Other',
+}
+
+/** What a booking's status means to the person reading it. */
+export const BOOKING_LABEL: Record<BookingStatus, { label: string; tone: 'green' | 'amber' | 'neutral' | 'danger' | 'indigo' }> = {
+  held:                 { label: 'Payment pending', tone: 'amber' },
+  confirmed:            { label: 'Confirmed',       tone: 'green' },
+  attended:             { label: 'Attended',        tone: 'indigo' },
+  no_show_student:      { label: 'Missed',          tone: 'neutral' },
+  cancelled_by_student: { label: 'You cancelled',   tone: 'neutral' },
+  cancelled_by_mentor:  { label: 'Mentor cancelled', tone: 'danger' },
+  cancelled_auto:       { label: 'Cancelled',       tone: 'neutral' },
+  refunded:             { label: 'Refunded',        tone: 'neutral' },
 }
 
 export interface MentorSummary {
   id: string
   name: string
   avatarUrl?: string
-  /** "Software Engineer at PhonePe" */
   headline: string
   company?: string
-  /** "Ex-Tier 3 College (UPTU, Lucknow)" */
-  collegeLine: string
-  collegeTier: CollegeTier
-  homeState: string
+  collegeLine?: string
+  collegeTier?: CollegeTier
+  homeState?: string
   languages: string[]
   firstGenGraduate: boolean
   tracks: Track[]
-  /** The designs make this a first-class field, not part of the bio. */
-  breakthroughStory: string
   topics: string[]
+  breakthroughStory?: string
   price1on1: number
   session1on1Minutes: number
+  trialOffer: boolean
   ratingAvg: number
   ratingCount: number
-  verified: boolean
-  activeToday?: boolean
-  /** Mentor is running an introductory ₹99 1:1 — renders the amber CTA. */
-  trialOffer?: boolean
+  sessionsCompleted: number
+  country: string
+  /** Only present on the matched list from the onboarding quiz. */
+  matchReasons?: MatchReasons
 }
 
-export interface GroupSessionSummary {
+export interface MatchReasons {
+  sameLanguage: boolean
+  sameState: boolean
+  tierStep: boolean
+  firstGen: boolean
+}
+
+export interface MentorDetail extends MentorSummary {
+  story?: string
+  currentPosition?: string
+  linkedinUrl: string
+}
+
+export interface SessionSummary {
   id: string
+  mentorId: string
+  mentorName: string
+  mentorAvatarUrl?: string
+  mentorCompany?: string
+  type: SessionType
   title: string
-  description: string
-  mentor: Pick<MentorSummary, 'id' | 'name' | 'avatarUrl'>
-  mentorCompany: string
-  track: Track
+  description?: string
+  track?: Track
+  topic?: string
   startAt: string
   endAt: string
   capacity: number
   seatsBooked: number
   minSeats: number
   price: number
+  status: SessionStatus
 }
 
-export const seatsLeft = (s: GroupSessionSummary) => s.capacity - s.seatsBooked
-export const isFull = (s: GroupSessionSummary) => seatsLeft(s) <= 0
+export interface BookingSummary {
+  id: string
+  status: BookingStatus
+  amount: number
+  holdExpiresAt?: string
+  createdAt: string
+  session: SessionSummary
+  hasReview: boolean
+}
+
+export const seatsLeft = (s: Pick<SessionSummary, 'capacity' | 'seatsBooked'>) =>
+  s.capacity - s.seatsBooked
+export const isFull = (s: Pick<SessionSummary, 'capacity' | 'seatsBooked'>) =>
+  seatsLeft(s) <= 0
+
+/** The join window the database enforces: 10 minutes before, until the end. */
+export function canJoin(s: Pick<SessionSummary, 'startAt' | 'endAt'>, now = new Date()) {
+  const start = new Date(s.startAt).getTime()
+  const end = new Date(s.endAt).getTime()
+  return now.getTime() >= start - 10 * 60_000 && now.getTime() <= end
+}

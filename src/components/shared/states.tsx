@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { AlertTriangle, SearchX } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -14,12 +15,15 @@ export function EmptyState({
   title,
   description,
   actionLabel,
+  actionHref,
   onAction,
   icon: Icon = SearchX,
 }: {
   title: string
   description?: string
   actionLabel?: string
+  /** Server components pass a link; client components pass onAction. */
+  actionHref?: string
   onAction?: () => void
   icon?: React.ElementType
 }) {
@@ -32,11 +36,16 @@ export function EmptyState({
       {description && (
         <p className="max-w-sm text-sm text-muted-foreground">{description}</p>
       )}
-      {actionLabel && onAction && (
-        <Button variant="outline" size="sm" onClick={onAction} className="mt-1">
-          {actionLabel}
-        </Button>
-      )}
+      {actionLabel &&
+        (onAction ? (
+          <Button variant="outline" size="sm" onClick={onAction} className="mt-1">
+            {actionLabel}
+          </Button>
+        ) : (
+          <Button variant="outline" size="sm" asChild className="mt-1">
+            <Link href={actionHref ?? '/signup'}>{actionLabel}</Link>
+          </Button>
+        ))}
     </div>
   )
 }

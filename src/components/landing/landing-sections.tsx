@@ -15,6 +15,7 @@ import {
   Sparkles,
   Users,
   Video,
+  CalendarDays,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -24,7 +25,8 @@ import { SectionHeading } from '@/components/shared/section-heading'
 import { MentorCard } from '@/components/shared/mentor-card'
 import { SessionCard } from '@/components/shared/session-card'
 import { Avatar } from '@/components/ui/avatar'
-import { MOCK_MENTORS, MOCK_SESSIONS } from '@/lib/mock-data'
+import { EmptyState } from '@/components/shared/states'
+import type { MentorSummary, SessionSummary } from '@/lib/types'
 
 /* ── section content ─────────────────────────────────────────────────────── */
 
@@ -140,14 +142,20 @@ const TRUST_CHIPS = [
 
 /* ── page ────────────────────────────────────────────────────────────────── */
 
-export function LandingSections() {
+export function LandingSections({
+  mentors,
+  sessions,
+}: {
+  mentors: MentorSummary[]
+  sessions: SessionSummary[]
+}) {
   return (
     <>
       <Hero />
       <RealityCheck />
       <Tracks />
-      <FeaturedMentors />
-      <UpcomingCohorts />
+      <FeaturedMentors mentors={mentors} />
+      <UpcomingCohorts sessions={sessions} />
       <HowItWorks />
       <Faq />
       <FounderNote />
@@ -297,7 +305,7 @@ function Tracks() {
   )
 }
 
-function FeaturedMentors() {
+function FeaturedMentors({ mentors }: { mentors: MentorSummary[] }) {
   return (
     <section className="container-page py-14 md:py-20">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -314,16 +322,26 @@ function FeaturedMentors() {
         </Button>
       </div>
 
-      <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {MOCK_MENTORS.slice(0, 3).map((m) => (
-          <MentorCard key={m.id} mentor={m} />
-        ))}
-      </div>
+      {mentors.length ? (
+        <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {mentors.map((m) => (
+            <MentorCard key={m.id} mentor={m} />
+          ))}
+        </div>
+      ) : (
+        <div className="mt-8">
+          <EmptyState
+            icon={Users}
+            title="Our first mentors are being verified right now"
+            description="Every mentor is reviewed by a person before they appear here. Join the list and we will tell you the moment the first sessions open."
+          />
+        </div>
+      )}
     </section>
   )
 }
 
-function UpcomingCohorts() {
+function UpcomingCohorts({ sessions }: { sessions: SessionSummary[] }) {
   return (
     <section className="container-page py-14 md:py-20">
       <Card className="bg-accent-soft/40 p-5 sm:p-7">
@@ -339,22 +357,36 @@ function UpcomingCohorts() {
               questions in voice or chat.
             </p>
           </div>
-          <Badge tone="green" size="md" className="shrink-0">
-            {MOCK_SESSIONS.length} sessions filling fast
-          </Badge>
+          {sessions.length > 0 && (
+            <Badge tone="green" size="md" className="shrink-0">
+              {sessions.length} {sessions.length === 1 ? 'session' : 'sessions'} filling fast
+            </Badge>
+          )}
         </div>
 
-        <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {MOCK_SESSIONS.map((s) => (
-            <SessionCard key={s.id} session={s} />
-          ))}
-        </div>
-
-        <Button variant="outline" full className="mt-5" asChild>
-          <Link href="/sessions">
-            See all ₹99 group sessions <ArrowRight aria-hidden />
-          </Link>
-        </Button>
+        {sessions.length ? (
+          <>
+            <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {sessions.map((s) => (
+                <SessionCard key={s.id} session={s} />
+              ))}
+            </div>
+            <Button variant="outline" full className="mt-5" asChild>
+              <Link href="/sessions">
+                See all ₹99 group sessions <ArrowRight aria-hidden />
+              </Link>
+            </Button>
+          </>
+        ) : (
+          <div className="mt-6">
+            <EmptyState
+              icon={CalendarDays}
+              title="The first cohort rooms are being scheduled"
+              description="₹99 gets you a live seat with up to 14 other students. Create an account and we will email you when the first one opens."
+              actionLabel="Create an account"
+            />
+          </div>
+        )}
       </Card>
     </section>
   )

@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Avatar } from '@/components/ui/avatar'
-import { isFull, seatsLeft, type GroupSessionSummary } from '@/lib/types'
+import { isFull, seatsLeft, type SessionSummary } from '@/lib/types'
 import { cn, formatINR, formatSessionTime } from '@/lib/utils'
 
 /** Group sessions are the ₹99 path, so every CTA here is amber. */
@@ -14,7 +14,7 @@ export function SessionCard({
   session,
   className,
 }: {
-  session: GroupSessionSummary
+  session: SessionSummary
   className?: string
 }) {
   const left = seatsLeft(session)
@@ -62,14 +62,14 @@ export function SessionCard({
       </div>
 
       <div className="flex items-center justify-between gap-3 border-t border-border-subtle p-4 sm:px-5">
-        <Link href={`/mentors/${session.mentor.id}`}
+        <Link href={`/mentors/${session.mentorId}`}
           className="flex min-w-0 items-center gap-2 text-xs hover:text-primary"
         >
-          <Avatar name={session.mentor.name} src={session.mentor.avatarUrl} size="sm" />
+          <Avatar name={session.mentorName} src={session.mentorAvatarUrl} size="sm" />
           <span className="min-w-0">
-            <span className="block truncate font-semibold">{session.mentor.name}</span>
+            <span className="block truncate font-semibold">{session.mentorName}</span>
             <span className="block truncate text-subtle-foreground">
-              {session.mentorCompany}
+              {session.mentorCompany ?? 'Mentor'}
             </span>
           </span>
         </Link>
