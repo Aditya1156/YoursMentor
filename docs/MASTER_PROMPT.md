@@ -4,7 +4,7 @@
 > the approved UI/UX designs and implemented in `client/src/styles/tokens.css`.
 
 > **How to use this file**
-> 1. Put this file in the root of the repo as `CLAUDE.md` (or `docs/MASTER_PROMPT.md` and point `CLAUDE.md` to it).
+> 1. Keep this file at `docs/MASTER_PROMPT.md`; `PROJECT.md` at the repo root points to it.
 > 2. Fill every `{{PLACEHOLDER}}` (name, theme colours, fonts, logo) before starting.
 > 3. Build **one page at a time** using the "Prompt template per page" in Section 12.
 > 4. After each page is done, tick it in Section 11 and commit.
@@ -52,7 +52,7 @@ These decisions simplify V1. Do **not** build the deferred items.
 ## 3. Tech stack (all free tiers)
 
 > **SUPERSEDED 2026-10-02.** The project moved to Next.js 16 + Supabase (Postgres,
-> Auth, Storage) on Vercel. See the stack and decisions table in `CLAUDE.md`; that
+> Auth, Storage) on Vercel. See the stack and decisions table in `PROJECT.md`; that
 > file wins wherever it disagrees with this section. Sections 1–2 and 5–14 still apply.
 
 | Layer | Choice |
@@ -541,10 +541,10 @@ Dev roles (rename with your team): **Dev A** – public pages & design system ·
 
 ---
 
-## 12. Prompt template per page (paste into Claude Code)
+## 12. Working brief per page
 
 ```
-Read CLAUDE.md fully. We are building page <ID> "<Page name>" from Section 8.
+Read PROJECT.md fully. We are building page <ID> "<Page name>" from Section 8.
 
 Do:
 1. List the files you will create or change.
@@ -558,7 +558,7 @@ Do:
 For a fix or change:
 
 ```
-Read CLAUDE.md. On page <ID>, change <what> because <why>. Keep everything else as is. Show me the diff summary and how to test.
+Read PROJECT.md. On page <ID>, change <what> because <why>. Keep everything else as is. Show me the diff summary and how to test.
 ```
 
 ---

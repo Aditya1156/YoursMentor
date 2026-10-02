@@ -3,16 +3,14 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
 /**
- * The mark sits on an opaque rounded white tile rather than floating
+ * The mark carries its own rounded white tile rather than floating
  * transparent. The artwork runs the whole lightness range — near-white cyan
- * (#04FFFF) through to near-black navy (#000345) — so on a dark surface the
- * cap vanishes and on a tinted one the cyan washes out. Measured against a
- * navy backing, 61% of the ink falls below 3:1; against white, 21%. White is
- * the only backdrop that holds the whole mark, so it is baked in.
+ * #04FFFF through to near-black navy #000345 — so there is no backdrop-free
+ * treatment that holds it: against navy 61% of the ink falls under 3:1
+ * contrast, against white 21%. White is baked into the SVG itself.
  *
- * A hairline ring keeps the tile from disappearing into a white navbar.
- * public/brand/mark-transparent.png is the version without the tile, for
- * print and dark-background artwork.
+ * public/brand/ also holds the raster lockups (wordmark, horizontal,
+ * stacked) for emails and social cards, where SVG is not an option.
  */
 export function Logo({
   className,
@@ -30,7 +28,7 @@ export function Logo({
       aria-label="YoursMentor.in — home"
     >
       <Image
-        src="/brand/mark.png"
+        src="/brand/mark.svg"
         alt=""
         width={size}
         height={size}
