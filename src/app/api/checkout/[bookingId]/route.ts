@@ -64,6 +64,26 @@ export async function POST(
     )
   }
 
+  // An included session comes first, because it is already paid for. Only then
+  // credits, and only then a card — spending money a student has handed over
+  // while an allowance sits unused is the kind of thing they notice.
+  const { data: covered } = await admin.rpc('spend_subscription_seat', {
+    p_booking: booking.id,
+  })
+  if (covered === true) {
+    const { error: confirmError } = await admin.rpc('confirm_booking', {
+      p_booking: booking.id,
+      p_payment_id: `plan_${booking.id}`,
+      p_order_id: null,
+    })
+    if (confirmError) {
+      // Put the session back rather than silently charging for it later.
+      await admin.rpc('refund_subscription_seat', { p_booking: booking.id })
+      return NextResponse.json({ error: confirmError.message }, { status: 409 })
+    }
+    return NextResponse.json({ status: 'confirmed', paidBy: 'plan' })
+  }
+
   // Balance comes from the ledger, never from the client.
   const { data: balanceRow } = await admin.rpc('credit_balance', { p_user: user.id })
   const balance = Number(balanceRow ?? 0)

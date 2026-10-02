@@ -30,6 +30,7 @@ const NAV_BY_ROLE: Record<'guest' | 'student' | 'mentor' | 'admin', readonly Nav
   guest: [
     { href: '/mentors', label: 'Find Mentors' },
     { href: '/sessions', label: 'Group Sessions (₹99)' },
+    { href: '/pricing', label: 'Plans' },
     { href: '/become-a-mentor', label: 'Become a Mentor' },
   ],
   student: [
@@ -37,6 +38,7 @@ const NAV_BY_ROLE: Record<'guest' | 'student' | 'mentor' | 'admin', readonly Nav
     { href: '/mentors', label: 'Find Mentors' },
     { href: '/sessions', label: 'Group Sessions (₹99)' },
     { href: '/my-sessions', label: 'My Sessions' },
+    { href: '/pricing', label: 'Plans' },
   ],
   mentor: [
     { href: '/mentor', label: 'Dashboard' },
