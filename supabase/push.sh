@@ -16,11 +16,16 @@ command -v supabase >/dev/null || {
 # --- 3. direct connection, no account login needed --------------------------
 if [ -n "${SUPABASE_DB_PASSWORD:-}" ]; then
   echo "Pushing with the database password..."
+  # The direct host, not the shared pooler. The pooler expects a tenant user
+  # (postgres.<ref>) and this project is not registered with the one we were
+  # pointed at, so it answers "tenant/user not found" however good the
+  # password is. db.<ref>.supabase.co is IPv6-only but resolves everywhere we
+  # deploy from.
   supabase db push --db-url \
-    "postgresql://postgres.${REF}:$(python3 -c "
+    "postgresql://postgres:$(python3 -c "
 import os, urllib.parse
 print(urllib.parse.quote(os.environ['SUPABASE_DB_PASSWORD'], safe=''))
-")@aws-1-ap-south-1.pooler.supabase.com:5432/postgres"
+")@db.${REF}.supabase.co:5432/postgres"
   echo "Done."
   exit 0
 fi
