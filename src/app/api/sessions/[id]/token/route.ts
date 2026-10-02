@@ -11,10 +11,20 @@ import { createClient } from '@/lib/supabase/server'
  * whether it may join a paid room.
  */
 export async function POST(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: sessionId } = await params
+
+  // A companion is a second device the same person is already signed in on —
+  // a tablet used as a writing surface beside the laptop running the call.
+  let device: 'primary' | 'companion' = 'primary'
+  try {
+    const body = await request.json()
+    if (body?.device === 'companion') device = 'companion'
+  } catch {
+    /* no body is the normal case */
+  }
 
   const { LIVEKIT_API_KEY, LIVEKIT_API_SECRET } = process.env
   if (!LIVEKIT_API_KEY || !LIVEKIT_API_SECRET) {
@@ -78,27 +88,47 @@ export async function POST(
   // Outlives the session by 15 minutes so a reconnect near the end still works.
   const ttl = Math.max(600, Math.floor((end - now) / 1000) + 900)
 
+  /**
+   * LiveKit identities must be unique within a room — joining twice with the
+   * same one disconnects the earlier connection. Keying identity on the user
+   * id alone meant signing in from a tablet would kick the laptop running the
+   * call, which is the opposite of what a companion device is for.
+   *
+   * The user id stays in metadata, so the UI can still group a person's
+   * devices and the mentor sees one name rather than two strangers.
+   */
+  const identity = `${user.id}#${device}#${crypto.randomUUID().slice(0, 8)}`
+
   const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
-    identity: user.id,
+    identity,
     name: profile?.name ?? 'Student',
-    metadata: JSON.stringify({ role: isMentor ? 'mentor' : 'student', avatarUrl: profile?.avatar_url }),
+    metadata: JSON.stringify({
+      userId: user.id,
+      role: isMentor ? 'mentor' : 'student',
+      device,
+      avatarUrl: profile?.avatar_url,
+    }),
     ttl,
   })
 
   at.addGrant({
     room,
     roomJoin: true,
-    canPublish: true,
+    // A companion publishes nothing but data. Two cameras and two microphones
+    // from one person would echo and take a tile each; the tablet is there to
+    // draw, not to be a second face in the grid.
+    canPublish: device === 'primary',
     canSubscribe: true,
     canPublishData: true,
     // Only the mentor may mute or remove people (spec §7).
-    roomAdmin: isMentor,
+    roomAdmin: isMentor && device === 'primary',
   })
 
   return NextResponse.json({
     token: await at.toJwt(),
     url: process.env.NEXT_PUBLIC_LIVEKIT_URL,
     room,
+    device,
     role: isMentor ? 'mentor' : 'student',
     title: session.title,
     endsAt: session.end_at,

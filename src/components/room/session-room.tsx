@@ -8,15 +8,20 @@ import {
 } from '@livekit/components-react'
 import { Room, Track } from 'livekit-client'
 import '@livekit/components-styles'
-import { AlertCircle, Flag, Loader2, MicOff, ShieldCheck, Video, WifiOff } from 'lucide-react'
+import {
+  AlertCircle, Flag, Loader2, MicOff, PenLine, ShieldCheck, Video, WifiOff,
+} from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Whiteboard } from '@/components/room/whiteboard'
+import { CompanionInvite } from '@/components/room/companion-invite'
 
 interface TokenResponse {
   token: string
   url: string
   room: string
+  device: 'primary' | 'companion'
   role: 'mentor' | 'student'
   title: string
   endsAt: string
@@ -26,20 +31,30 @@ interface TokenResponse {
 type Phase = 'prejoin' | 'connecting' | 'live' | 'error'
 
 export function SessionRoom({
-  sessionId, displayName,
-}: { sessionId: string; displayName: string }) {
+  sessionId, displayName, device = 'primary',
+}: {
+  sessionId: string
+  displayName: string
+  /** A companion is a second device — a tablet used as a writing surface. */
+  device?: 'primary' | 'companion'
+}) {
   const [phase, setPhase] = useState<Phase>('prejoin')
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<TokenResponse | null>(null)
   const [room, setRoom] = useState<Room | null>(null)
   /** Spec §7: students on weak mobile data need to drop video entirely. */
   const [audioOnly, setAudioOnly] = useState(false)
+  const [view, setView] = useState<'video' | 'board'>(device === 'companion' ? 'board' : 'video')
 
   const join = useCallback(async () => {
     setPhase('connecting')
     setError(null)
     try {
-      const res = await fetch(`/api/sessions/${sessionId}/token`, { method: 'POST' })
+      const res = await fetch(`/api/sessions/${sessionId}/token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device }),
+      })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Could not join this session.')
 
@@ -54,8 +69,12 @@ export function SessionRoom({
         videoCaptureDefaults: { resolution: { width: 640, height: 360, frameRate: 24 } },
       })
       await r.connect(data.url, data.token)
-      await r.localParticipant.setMicrophoneEnabled(true)
-      await r.localParticipant.setCameraEnabled(!audioOnly)
+      // A companion publishes nothing — the laptop beside it is already the
+      // camera and the microphone for this person.
+      if (device === 'primary') {
+        await r.localParticipant.setMicrophoneEnabled(true)
+        await r.localParticipant.setCameraEnabled(!audioOnly)
+      }
 
       setInfo(data)
       setRoom(r)
@@ -64,14 +83,14 @@ export function SessionRoom({
       setError(e instanceof Error ? e.message : 'Could not join this session.')
       setPhase('error')
     }
-  }, [sessionId, audioOnly])
+  }, [sessionId, audioOnly, device])
 
   useEffect(() => () => { room?.disconnect() }, [room])
 
   useEffect(() => {
-    if (!room) return
+    if (!room || device !== 'primary') return
     void room.localParticipant.setCameraEnabled(!audioOnly)
-  }, [audioOnly, room])
+  }, [audioOnly, room, device])
 
   if (phase === 'live' && room && info) {
     return (
@@ -82,9 +101,29 @@ export function SessionRoom({
             <p className="truncate text-sm font-semibold text-white">{info.title}</p>
           </div>
           <div className="flex items-center gap-2">
+            <div className="flex rounded-[var(--radius-pill)] bg-white/10 p-0.5">
+              {(['video', 'board'] as const).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setView(v)}
+                  aria-pressed={view === v}
+                  className={`flex items-center gap-1.5 rounded-[var(--radius-pill)] px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    view === v ? 'bg-white text-[var(--navy-900)]' : 'text-white hover:bg-white/10'
+                  }`}
+                >
+                  {v === 'video' ? <Video className="size-3.5" /> : <PenLine className="size-3.5" />}
+                  {v === 'video' ? 'Video' : 'Whiteboard'}
+                </button>
+              ))}
+            </div>
+
+            {device === 'primary' && <CompanionInvite sessionId={sessionId} />}
+
             <button
               type="button"
               onClick={() => setAudioOnly((v) => !v)}
+              hidden={device === 'companion'}
               className="inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20"
             >
               {audioOnly ? <MicOff className="size-3.5" aria-hidden /> : <WifiOff className="size-3.5" aria-hidden />}
@@ -100,10 +139,14 @@ export function SessionRoom({
         </div>
 
         <RoomContext.Provider value={room}>
-          <div className="flex min-h-0 flex-1 flex-col">
-            <Stage />
+          <div className="flex min-h-0 flex-1 flex-col gap-2 px-4 pb-3">
+            {view === 'video' ? (
+              <Stage />
+            ) : (
+              <Whiteboard room={room} canDraw={info.role === 'mentor' || device === 'companion'} />
+            )}
             <RoomAudioRenderer />
-            <ControlBar variation="verbose" />
+            {device === 'primary' && <ControlBar variation="verbose" />}
           </div>
         </RoomContext.Provider>
       </div>
