@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Reveal } from '@/components/shared/reveal'
 import { CountUp } from '@/components/shared/count-up'
 import { HeroVisual } from '@/components/landing/hero-visual'
+import { GlyphField } from '@/components/landing/glyph-field'
 
 const CHIPS = [
   { icon: MonitorPlay, label: '100% on-platform video' },
@@ -17,6 +18,8 @@ const CHIPS = [
 export function Hero({ mentorCount, sessionCount }: { mentorCount: number; sessionCount: number }) {
   return (
     <section className="aurora relative overflow-hidden border-b border-border bg-surface-muted">
+      <div aria-hidden className="bg-grid fade-edges pointer-events-none absolute inset-0" />
+      <GlyphField />
       <div className="container-page relative grid items-center gap-10 py-12 lg:grid-cols-[1.05fr_1fr] lg:py-20">
         <div className="flex flex-col items-start gap-5">
           <Reveal>

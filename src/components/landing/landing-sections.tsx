@@ -52,7 +52,7 @@ export function LandingSections({
   founderVideoId?: string
 }) {
   return (
-    <>
+    <div className="page-wash">
       <Hero mentorCount={mentors.length} sessionCount={sessions.length} />
       <TrustStrip />
       <RealityCheck />
@@ -62,13 +62,14 @@ export function LandingSections({
       <HowItWorks />
       <Faq />
       <FounderVideo videoId={founderVideoId} />
-    </>
+    </div>
   )
 }
 
 function FeaturedMentors({ mentors }: { mentors: MentorSummary[] }) {
   return (
-    <section className="container-page py-14 md:py-20">
+    <section className="glow-top relative py-14 md:py-16">
+      <div className="container-page relative">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <SectionHeading
           align="left"
@@ -100,6 +101,7 @@ function FeaturedMentors({ mentors }: { mentors: MentorSummary[] }) {
           />
         </div>
       )}
+      </div>
     </section>
   )
 }
@@ -165,7 +167,12 @@ function HowItWorks() {
     green: 'bg-success-soft text-success',
   }
   return (
-    <section className="container-page py-14 md:py-20">
+    <section className="relative py-14 md:py-16">
+      <div
+        aria-hidden
+        className="bg-grid fade-edges pointer-events-none absolute inset-0 opacity-60"
+      />
+      <div className="container-page relative">
       <SectionHeading
         eyebrow="Smooth & Transparent"
         title="Get Real Guidance in 3 Simple Steps"
@@ -190,6 +197,7 @@ function HowItWorks() {
           </li>
         ))}
       </ol>
+      </div>
     </section>
   )
 }

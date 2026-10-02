@@ -71,7 +71,8 @@ const TRACKS = [
 
 export function Tracks() {
   return (
-    <section className="container-page py-14 md:py-16">
+    <section className="band-tint glow-top relative overflow-hidden py-14 md:py-16">
+      <div className="container-page relative">
       <Reveal>
         <SectionHeading
           eyebrow="Focused pathways"
@@ -176,6 +177,7 @@ export function Tracks() {
             </Reveal>
           )
         })}
+      </div>
       </div>
     </section>
   )

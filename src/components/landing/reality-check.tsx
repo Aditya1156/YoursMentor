@@ -41,7 +41,12 @@ const PROBLEMS = [
 
 export function RealityCheck() {
   return (
-    <section className="container-page py-14 md:py-16">
+    <section className="relative py-14 md:py-16">
+      <div
+        aria-hidden
+        className="bg-dots fade-edges pointer-events-none absolute inset-0 opacity-70"
+      />
+      <div className="container-page relative">
       <Reveal>
         <SectionHeading
           eyebrow="The reality check"
@@ -85,6 +90,7 @@ export function RealityCheck() {
             </article>
           </Reveal>
         ))}
+      </div>
       </div>
     </section>
   )

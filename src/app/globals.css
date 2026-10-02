@@ -203,6 +203,87 @@
   }
 }
 
+/* ===========================================================================
+   Surfaces
+   A page of flat white reads as unfinished. These give each band its own
+   depth without a single image request — all of it is gradients and repeating
+   SVG, so the cost is a few hundred bytes rather than a few hundred kilobytes.
+
+   Tints are kept low enough that even when every layer stacks on one pixel —
+   page wash, band tint and the heading glow together — body copy still clears
+   4.5:1. The first pass was roughly twice as strong and pulled it to 3.74:1,
+   which is the trap with decorative backgrounds: each layer looks harmless on
+   its own.
+   =========================================================================== */
+
+@layer utilities {
+  /* A page-wide wash: barely-there brand colour pooling at the top. */
+  .page-wash {
+    background-image:
+      radial-gradient(60rem 32rem at 12% -6rem, rgb(19 220 252 / 0.05), transparent 60%),
+      radial-gradient(52rem 30rem at 92% -2rem, rgb(0 105 238 / 0.045), transparent 60%);
+    background-repeat: no-repeat;
+  }
+
+  /* Alternating band, so sections do not run together. */
+  .band-tint {
+    background-image: linear-gradient(
+      180deg,
+      transparent,
+      rgb(0 105 238 / 0.018) 35%,
+      rgb(19 220 252 / 0.02) 65%,
+      transparent
+    );
+  }
+
+  /* Graph paper. Reads as a notebook, which is the right association here. */
+  .bg-grid {
+    background-image:
+      linear-gradient(rgb(0 105 238 / 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(0 105 238 / 0.045) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  .bg-dots {
+    background-image: radial-gradient(rgb(0 105 238 / 0.06) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  /* Fades a pattern out before it reaches the text, so nothing fights copy. */
+  .fade-edges {
+    mask-image: radial-gradient(70% 60% at 50% 40%, #000 35%, transparent 100%);
+  }
+
+  /* A soft glow behind a section's heading. */
+  .glow-top::before {
+    content: '';
+    position: absolute;
+    inset-block-start: -6rem;
+    inset-inline-start: 50%;
+    translate: -50% 0;
+    inline-size: min(48rem, 90%);
+    block-size: 20rem;
+    border-radius: 9999px;
+    background: radial-gradient(closest-side, rgb(0 105 238 / 0.07), transparent);
+    pointer-events: none;
+    filter: blur(8px);
+  }
+
+  /* Hairline rule that fades at both ends, instead of a hard border. */
+  .rule-fade {
+    block-size: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+
+  /* Decorative education glyphs drifting behind the hero. */
+  .glyph {
+    position: absolute;
+    color: var(--blue-600);
+    opacity: 0.09;
+    pointer-events: none;
+  }
+}
+
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
