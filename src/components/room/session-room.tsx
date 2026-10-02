@@ -92,7 +92,11 @@ export function SessionRoom({
   )
   const resumed = useRef(false)
 
+  const joining = useRef(false)
+
   const join = useCallback(async () => {
+    if (joining.current) return
+    joining.current = true
     setPhase('connecting')
     setError(null)
     try {
@@ -127,8 +131,15 @@ export function SessionRoom({
       setRoom(r)
       setPhase('live')
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not join this session.')
+      // The session being over is the common reason a resume fails, and it is
+      // not worth offering to retry — clear the flag so coming back here again
+      // does not immediately try and fail once more.
+      const message = e instanceof Error ? e.message : 'Could not join this session.'
+      if (/ended|no longer|cancelled/i.test(message)) forgetIn(sessionId)
+      setError(message)
       setPhase('error')
+    } finally {
+      joining.current = false
     }
   }, [sessionId, audioOnly, device])
 
@@ -253,9 +264,7 @@ export function SessionRoom({
 
 /* ========================================================== the live room == */
 
-function LiveRoom({
-  room, info, sessionId, device, audioOnly, onAudioOnly, onLeft,
-}: {
+interface LiveRoomProps {
   room: Room
   info: TokenResponse
   sessionId: string
@@ -263,7 +272,28 @@ function LiveRoom({
   audioOnly: boolean
   onAudioOnly: (v: boolean) => void
   onLeft: () => void
-}) {
+}
+
+/**
+ * The provider has to be above the hooks that read it.
+ *
+ * useTracks() calls useRoomContext(), so calling it in the same component that
+ * renders RoomContext.Provider leaves it reading no context at all — a hook
+ * cannot consume a context its own component provides. The screen-share lookup
+ * was in that position, which is why annotation never lit up and why a rejoin
+ * could take the whole page down rather than showing an error.
+ */
+function LiveRoom(props: LiveRoomProps) {
+  return (
+    <RoomContext.Provider value={props.room}>
+      <LiveRoomInner {...props} />
+    </RoomContext.Provider>
+  )
+}
+
+function LiveRoomInner({
+  room, info, sessionId, device, audioOnly, onAudioOnly, onLeft,
+}: LiveRoomProps) {
   const [view, setView] = useState<'video' | 'board'>(device === 'companion' ? 'board' : 'video')
   const [micOn, setMicOn] = useState(device === 'primary')
   const [camOn, setCamOn] = useState(device === 'primary' && !audioOnly)
@@ -273,6 +303,7 @@ function LiveRoom({
   const [reconnecting, setReconnecting] = useState(false)
   const [people, setPeople] = useState(room.numParticipants + 1)
   const [left, setLeft] = useState('')
+  const [deviceError, setDeviceError] = useState<string | null>(null)
 
   // The chrome reads its state from the room, not from what this component last
   // asked for — a track can be muted by the browser, by a permissions prompt or
@@ -286,6 +317,9 @@ function LiveRoom({
     }
     const onReconnecting = () => setReconnecting(true)
     const onReconnected = () => setReconnecting(false)
+    // LiveKit gives up after its own retries. Staying on a "live" screen whose
+    // buttons all throw is worse than saying the connection went.
+    const onDisconnected = () => onLeft()
 
     room.on(RoomEvent.LocalTrackPublished, sync)
     room.on(RoomEvent.LocalTrackUnpublished, sync)
@@ -295,6 +329,7 @@ function LiveRoom({
     room.on(RoomEvent.ParticipantDisconnected, sync)
     room.on(RoomEvent.Reconnecting, onReconnecting)
     room.on(RoomEvent.Reconnected, onReconnected)
+    room.on(RoomEvent.Disconnected, onDisconnected)
     sync()
     return () => {
       room.off(RoomEvent.LocalTrackPublished, sync)
@@ -305,8 +340,9 @@ function LiveRoom({
       room.off(RoomEvent.ParticipantDisconnected, sync)
       room.off(RoomEvent.Reconnecting, onReconnecting)
       room.off(RoomEvent.Reconnected, onReconnected)
+      room.off(RoomEvent.Disconnected, onDisconnected)
     }
-  }, [room])
+  }, [room, onLeft])
 
   // How long is left, so the room closing is never a surprise.
   useEffect(() => {
@@ -336,6 +372,17 @@ function LiveRoom({
 
   const canDraw = info.role === 'mentor' || device === 'companion'
 
+  /**
+   * Every control goes through this. Toggling a track on a room that has just
+   * died throws, and an unhandled rejection inside an onClick is what replaced
+   * the call with "something went wrong, reload" instead of an error we chose.
+   */
+  function guard(fn: () => Promise<unknown>) {
+    return () => {
+      fn().catch(() => setDeviceError('That did not work. Your connection may have dropped.'))
+    }
+  }
+
   async function toggleShare() {
     try {
       await room.localParticipant.setScreenShareEnabled(!sharing, { audio: true })
@@ -351,7 +398,7 @@ function LiveRoom({
   }
 
   return (
-    <RoomContext.Provider value={room}>
+    <>
       <div className="flex h-[calc(100dvh-4rem)] flex-col bg-[var(--navy-900)]">
         {/* ---------------------------------------------------------- header */}
         <header className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 sm:px-4">
@@ -423,6 +470,16 @@ function LiveRoom({
           )}
 
           {showPeople && <PeoplePanel room={room} onClose={() => setShowPeople(false)} />}
+
+          {deviceError && (
+            <button
+              type="button"
+              onClick={() => setDeviceError(null)}
+              className="absolute bottom-2 left-1/2 z-30 -translate-x-1/2 rounded-[var(--radius-pill)] bg-danger px-4 py-2 text-xs font-semibold text-white"
+            >
+              {deviceError} · dismiss
+            </button>
+          )}
         </div>
 
         {/* -------------------------------------------------------- controls */}
@@ -437,12 +494,12 @@ function LiveRoom({
               canAnnotate={canDraw}
               screenShareActive={screenShareActive}
               participants={people}
-              onMic={() => void room.localParticipant.setMicrophoneEnabled(!micOn)}
-              onCam={() => void room.localParticipant.setCameraEnabled(!camOn)}
-              onShare={() => void toggleShare()}
+              onMic={guard(() => room.localParticipant.setMicrophoneEnabled(!micOn))}
+              onCam={guard(() => room.localParticipant.setCameraEnabled(!camOn))}
+              onShare={guard(toggleShare)}
               onAnnotate={() => setWantAnnotate((v) => !v)}
               onParticipants={() => setShowPeople((v) => !v)}
-              onLeave={() => void leave()}
+              onLeave={guard(leave)}
             />
           </div>
         ) : (
@@ -453,7 +510,7 @@ function LiveRoom({
 
         <RoomAudioRenderer />
       </div>
-    </RoomContext.Provider>
+    </>
   )
 }
 
