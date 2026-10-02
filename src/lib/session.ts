@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { homeFor as homeForUser } from '@/lib/home'
 import { createClient } from '@/lib/supabase/server'
 
 export interface SessionUser {
@@ -77,13 +78,8 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   }
 }
 
-/** Where a user lands after signing in (spec §8 A1/A2). */
-export function homeFor(user: Pick<SessionUser, 'role' | 'isAdultConfirmed' | 'onboardingComplete'>) {
-  if (!user.isAdultConfirmed) return '/complete-profile'
-  if (user.role === 'admin') return '/admin'
-  if (user.role === 'mentor') return '/mentor'
-  return user.onboardingComplete ? '/dashboard' : '/onboarding'
-}
+// One definition, shared with the middleware. See src/lib/home.ts.
+export { homeFor } from '@/lib/home'
 
 /**
  * Guards a student-only page.
@@ -96,6 +92,6 @@ export function homeFor(user: Pick<SessionUser, 'role' | 'isAdultConfirmed' | 'o
 export async function requireStudent(next: string): Promise<SessionUser> {
   const user = await getSessionUser()
   if (!user) redirect(`/signin?next=${encodeURIComponent(next)}`)
-  if (user.role !== 'student') redirect(homeFor(user))
+  if (user.role !== 'student') redirect(homeForUser(user))
   return user
 }

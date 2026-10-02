@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { homeFor } from '@/lib/home'
 
 const PROTECTED_PREFIXES = [
   '/dashboard',
@@ -60,22 +61,37 @@ export async function proxy(request: NextRequest) {
     return redirectTo('/signin', `${path}${request.nextUrl.search}`)
   }
 
-  if (user && AUTH_PAGES.includes(path)) {
-    return redirectTo('/dashboard')
-  }
+  // Signed in, and on a page that is either not for them or is the front door.
+  // The landing page sells the product to someone who has not joined; showing it
+  // to a mentor who signed in to take a call is just an extra tap. Their own
+  // dashboard is the first thing they should see.
+  const atFrontDoor = path === '/'
+  const atAuthPage = AUTH_PAGES.includes(path)
 
-  // The 18+ gate. A Google sign-in has no date of birth, so the account is
-  // parked at /complete-profile until it does — enforced here as well as by
-  // the `adult_needs_dob` constraint in the database.
-  if (user && needsAuth && path !== '/complete-profile') {
+  if (user && (atFrontDoor || atAuthPage || (needsAuth && path !== '/complete-profile'))) {
+    // One lookup serves all three decisions. The 18+ gate is enforced here as
+    // well as by the `adult_needs_dob` constraint in the database, because a
+    // Google sign-in arrives without a date of birth.
     const { data: profile } = await supabase
       .from('profiles')
-      .select('is_adult_confirmed')
+      .select('role, is_adult_confirmed, onboarding_complete')
       .eq('id', user.id)
       .single()
 
-    if (profile && !profile.is_adult_confirmed) {
-      return redirectTo('/complete-profile', `${path}${request.nextUrl.search}`)
+    if (profile) {
+      const home = homeFor({
+        role: profile.role,
+        isAdultConfirmed: profile.is_adult_confirmed,
+        onboardingComplete: profile.onboarding_complete,
+      })
+
+      // Never redirect a page to itself.
+      if (home !== path) {
+        if (atFrontDoor || atAuthPage) return redirectTo(home)
+        if (!profile.is_adult_confirmed) {
+          return redirectTo('/complete-profile', `${path}${request.nextUrl.search}`)
+        }
+      }
     }
   }
 
