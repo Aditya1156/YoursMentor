@@ -32,6 +32,19 @@ interface Props {
   razorpayEnabled: boolean
 }
 
+/** Razorpay's checkout script, loaded only when someone actually pays. */
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined') return resolve(false)
+    if ((window as unknown as { Razorpay?: unknown }).Razorpay) return resolve(true)
+    const el = document.createElement('script')
+    el.src = 'https://checkout.razorpay.com/v1/checkout.js'
+    el.onload = () => resolve(true)
+    el.onerror = () => resolve(false)
+    document.body.appendChild(el)
+  })
+}
+
 export function CheckoutPanel({ booking, creditBalance, razorpayEnabled }: Props) {
   const router = useRouter()
   const [useCredits, setUseCredits] = useState(creditBalance > 0)
@@ -61,6 +74,71 @@ export function CheckoutPanel({ booking, creditBalance, razorpayEnabled }: Props
     return `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`
   }, [left])
 
+  /**
+   * Opens Razorpay. The handler callback is only a hint that the student got
+   * through the modal — the seat is confirmed by the webhook, which is the
+   * only path that verifies a signature. So this polls the booking rather than
+   * trusting the callback.
+   */
+  async function openRazorpay(data: {
+    razorpayOrderId: string
+    razorpayKeyId: string
+    amount: number
+  }) {
+    const ok = await loadRazorpayScript()
+    if (!ok) {
+      setError('Could not reach the payment window. Check your connection.')
+      return
+    }
+
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    const rzp = new (window as any).Razorpay({
+      key: data.razorpayKeyId,
+      order_id: data.razorpayOrderId,
+      amount: data.amount,
+      currency: 'INR',
+      name: 'YoursMentor.in',
+      description: booking.session.title,
+      image: '/brand/mark.svg',
+      theme: { color: '#0069EE' },
+      handler: () => {
+        setBusy(true)
+        void waitForConfirmation()
+      },
+      modal: {
+        ondismiss: () => {
+          setBusy(false)
+          setError('Payment was cancelled. Your seat is still held for a few minutes.')
+        },
+      },
+    })
+    rzp.on('payment.failed', (res: any) => {
+      setBusy(false)
+      setError(res?.error?.description ?? 'That payment did not go through.')
+    })
+    rzp.open()
+  }
+
+  /** The webhook confirms the seat; this waits for it rather than assuming. */
+  async function waitForConfirmation() {
+    for (let i = 0; i < 12; i++) {
+      await new Promise((r) => setTimeout(r, 1500))
+      const res = await fetch(`/api/bookings/${booking.id}/status`, { cache: 'no-store' })
+      if (res.ok) {
+        const { status } = await res.json()
+        if (status === 'confirmed' || status === 'attended') {
+          router.push(`/booking/${booking.id}/confirmed`)
+          return
+        }
+      }
+    }
+    setBusy(false)
+    setError(
+      'Your payment went through but we are still confirming it. ' +
+        'Check My sessions in a minute — do not pay again.'
+    )
+  }
+
   async function pay() {
     setBusy(true)
     setError(null)
@@ -77,9 +155,9 @@ export function CheckoutPanel({ booking, creditBalance, razorpayEnabled }: Props
         router.push(`/booking/${booking.id}/confirmed`)
         return
       }
-      // Razorpay hand-off lands here once keys exist.
-      if (data.razorpayOrderId) {
-        router.push(`/booking/${booking.id}/confirmed`)
+
+      if (data.status === 'payment_required') {
+        await openRazorpay(data)
         return
       }
       throw new Error('Payment is not available yet.')

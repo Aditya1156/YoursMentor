@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getRazorpay, RazorpayUnavailable, toPaise } from '@/lib/razorpay'
 
 /**
  * Starts payment for a held booking.
@@ -70,17 +71,51 @@ export async function POST(
   const remainder = booking.amount - creditsApplied
 
   if (remainder > 0) {
-    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    let razorpay
+    try {
+      razorpay = getRazorpay()
+    } catch (e) {
       return NextResponse.json(
-        { error: 'Card and UPI payment is not switched on yet.' },
+        {
+          error: e instanceof RazorpayUnavailable
+            ? e.message
+            : 'Card and UPI payment is not switched on yet.',
+        },
         { status: 503 }
       )
     }
-    // Razorpay order creation goes here; the webhook calls confirm_booking().
-    return NextResponse.json(
-      { error: 'Razorpay is configured but the order flow is not wired yet.' },
-      { status: 503 }
+
+    // The booking id rides along in notes so the webhook can find it again.
+    const order = await razorpay.orders.create({
+      amount: toPaise(remainder),
+      currency: 'INR',
+      receipt: booking.id,
+      notes: { booking_id: booking.id, student_id: user.id },
+    })
+
+    await admin.from('payments').upsert(
+      {
+        booking_id: booking.id,
+        student_id: user.id,
+        amount: remainder,
+        status: 'created',
+        razorpay_order_id: order.id,
+      },
+      { onConflict: 'razorpay_order_id' }
     )
+
+    await admin
+      .from('bookings')
+      .update({ razorpay_order_id: order.id, credits_applied: creditsApplied })
+      .eq('id', booking.id)
+
+    return NextResponse.json({
+      status: 'payment_required',
+      razorpayOrderId: order.id,
+      razorpayKeyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      amount: toPaise(remainder),
+      creditsApplied,
+    })
   }
 
   // Fully covered by credits. Debit first — if confirm fails we would rather
