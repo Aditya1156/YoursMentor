@@ -1,0 +1,198 @@
+/* ==========================================================================
+   OneStep — design tokens
+   Derived from the approved UI/UX designs (landing, mentor directory,
+   mentor profile). Section 4 of docs/MASTER_PROMPT.md.
+
+   Rule of the brand: INDIGO is the paid 1:1 path, AMBER is the ₹99 group
+   path. Never mix them. A ₹99 call-to-action is always amber; a 1:1
+   call-to-action is always indigo. This is semantic, not decorative.
+   ========================================================================== */
+
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* ---- brand ramps ---------------------------------------------------- */
+  --indigo-50: #eeeefb;
+  --indigo-100: #e0e0f8;
+  --indigo-200: #c4c3f0;
+  --indigo-300: #9b99e4;
+  --indigo-400: #6b68d2;
+  --indigo-500: #4a46ba;
+  --indigo-600: #3b36a8;
+  --indigo-700: #2e2a9e; /* primary — "Find a Mentor", "Book 1:1" */
+  --indigo-800: #242185;
+  --indigo-900: #1b1963;
+
+  --amber-50: #fdf6e8;
+  --amber-100: #faebcd;
+  --amber-200: #f3d79c;
+  --amber-300: #e8bb5f;
+  --amber-400: #d49c2a;
+  --amber-500: #b8780a; /* accent — "Reserve ₹99", "Book ₹99 Trial" */
+  --amber-600: #9c6408;
+  --amber-700: #7a4e06;
+
+  /* ---- neutrals ------------------------------------------------------- */
+  --ink-900: #14152e; /* headings */
+  --ink-700: #2f3150;
+  --ink-500: #5a5e7d; /* body */
+  --ink-400: #797e9c;
+  --ink-300: #a3a7c0; /* placeholder */
+  --line-200: #e6e8f2;
+  --line-100: #eef0f8;
+  --surface-raised: #ffffff;
+  --surface-sunken: #f2f3fb; /* section panels, hero band */
+  --surface-page: #f7f8fc;
+
+  /* ---- status --------------------------------------------------------- */
+  --green-50: #e4f6ec;
+  --green-600: #1f8a4c;
+  --red-50: #fdeaea;
+  --red-600: #c5372c;
+  --sky-50: #e5f0fd;
+  --sky-600: #1b5fa8;
+
+  /* ---- semantic (light) ----------------------------------------------- */
+  --background: var(--surface-page);
+  --surface: var(--surface-raised);
+  --surface-muted: var(--surface-sunken);
+  --foreground: var(--ink-900);
+  --muted-foreground: var(--ink-500);
+  --subtle-foreground: var(--ink-400);
+  --border: var(--line-200);
+  --border-subtle: var(--line-100);
+
+  --primary: var(--indigo-700);
+  --primary-hover: var(--indigo-800);
+  --primary-foreground: #ffffff;
+  --primary-soft: var(--indigo-50);
+  --primary-soft-foreground: var(--indigo-600);
+
+  --accent: var(--amber-500);
+  --accent-hover: var(--amber-600);
+  --accent-foreground: #ffffff;
+  --accent-soft: var(--amber-50);
+  --accent-soft-foreground: var(--amber-700);
+
+  --success: var(--green-600);
+  --success-soft: var(--green-50);
+  --warning: var(--amber-500);
+  --warning-soft: var(--amber-50);
+  --danger: var(--red-600);
+  --danger-soft: var(--red-50);
+  --info: var(--sky-600);
+  --info-soft: var(--sky-50);
+
+  --ring: var(--indigo-400);
+
+  /* ---- the two booking paths (see rule above) -------------------------- */
+  --cta-group: var(--amber-500); /* ₹99 group sessions */
+  --cta-group-hover: var(--amber-600);
+  --cta-group-foreground: #ffffff;
+  --cta-1on1: var(--indigo-700); /* paid 1:1 sessions */
+  --cta-1on1-hover: var(--indigo-800);
+  --cta-1on1-foreground: #ffffff;
+
+  /* ---- shape ----------------------------------------------------------- */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px; /* cards, panels */
+  --radius-xl: 18px; /* hero band, feature panels */
+  --radius-pill: 999px;
+}
+
+/* Dark mode is defined for completeness (Section 4 asks for it) but the
+   approved designs are light-only — treat these values as provisional until
+   a dark comp exists. */
+.dark {
+  --background: #0d0e1c;
+  --surface: #151729;
+  --surface-muted: #1b1d33;
+  --foreground: #f1f2f9;
+  --muted-foreground: #a3a7c0;
+  --subtle-foreground: #797e9c;
+  --border: #272a44;
+  --border-subtle: #1f2138;
+
+  --primary: var(--indigo-400);
+  --primary-hover: var(--indigo-300);
+  --primary-foreground: #0d0e1c;
+  --primary-soft: #1f2047;
+  --primary-soft-foreground: var(--indigo-200);
+
+  --accent: var(--amber-300);
+  --accent-hover: var(--amber-200);
+  --accent-foreground: #0d0e1c;
+  --accent-soft: #332813;
+  --accent-soft-foreground: var(--amber-200);
+
+  --success: #4cc383;
+  --success-soft: #11301f;
+  --danger: #ef6a5e;
+  --danger-soft: #3a1512;
+  --info: #5ea8ef;
+  --info-soft: #11263c;
+
+  --cta-group: var(--amber-300);
+  --cta-group-foreground: #0d0e1c;
+  --cta-1on1: var(--indigo-400);
+  --cta-1on1-foreground: #0d0e1c;
+}
+
+/* ---- expose semantics to Tailwind ------------------------------------- */
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-subtle-foreground: var(--subtle-foreground);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-soft-foreground: var(--primary-soft-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-soft-foreground: var(--accent-soft-foreground);
+
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+
+  --color-cta-group: var(--cta-group);
+  --color-cta-group-hover: var(--cta-group-hover);
+  --color-cta-group-foreground: var(--cta-group-foreground);
+  --color-cta-1on1: var(--cta-1on1);
+  --color-cta-1on1-hover: var(--cta-1on1-hover);
+  --color-cta-1on1-foreground: var(--cta-1on1-foreground);
+
+  --color-ring: var(--ring);
+
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', Roboto, sans-serif;
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-pill: var(--radius-pill);
+
+  /* Soft, low-contrast elevation — the designs use borders more than shadow */
+  --shadow-card: 0 1px 2px rgba(20, 21, 46, 0.04);
+  --shadow-raised: 0 4px 16px rgba(20, 21, 46, 0.06);
+  --shadow-pop: 0 12px 32px rgba(20, 21, 46, 0.1);
+}
