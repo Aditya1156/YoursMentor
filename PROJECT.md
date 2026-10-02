@@ -217,6 +217,7 @@ Cron functions run from `/api/cron/*` with the service-role client, on the sched
 | `release-holds` | 5 min | An abandoned checkout holds a seat nobody paid for |
 | `complete-sessions` | 15 min | Earnings and reviews both need a completed session |
 | `auto-cancel` | hourly | Acts on a six-hour window, so finer is wasted work |
+| `purge-accounts` | daily 03:00 | The only job that destroys data, so it runs rarely and predictably |
 
 Vercel Cron signs each request with `CRON_SECRET` as a bearer token, compared in constant
 time. **Without that variable the routes refuse everything** — they move seats and money,
