@@ -3,15 +3,16 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  BadgePercent, CalendarRange, Flag, LayoutDashboard, UserCheck, Users, Wallet,
+  BadgePercent, CalendarRange, Flag, LayoutDashboard, Receipt, UserCheck, Users, Wallet,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const LINKS = [
   { href: '/admin', label: 'Overview', icon: LayoutDashboard, exact: true },
   { href: '/admin/mentors', label: 'Mentors', icon: UserCheck },
+  { href: '/admin/sessions', label: 'Sessions', icon: CalendarRange },
   { href: '/admin/users', label: 'Students', icon: Users },
-  { href: '/admin/bookings', label: 'Bookings', icon: CalendarRange },
+  { href: '/admin/bookings', label: 'Bookings', icon: Receipt },
   { href: '/admin/coupons', label: 'Coupons', icon: BadgePercent },
   { href: '/admin/reports', label: 'Reports', icon: Flag },
   { href: '/admin/payouts', label: 'Payouts', icon: Wallet },
