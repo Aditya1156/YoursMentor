@@ -2,20 +2,25 @@ import Link from 'next/link'
 import { BadgeCheck, Sparkles, Zap } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { Avatar } from '@/components/ui/avatar'
 import { StarRating } from '@/components/shared/star-rating'
+import { CompanyBadge } from '@/components/shared/company-badge'
 import { MatchReasonChips } from '@/components/shared/match-reasons'
+import { companyTone } from '@/lib/company'
 import { TIER_LABEL, type MentorSummary } from '@/lib/types'
 import { cn, formatINR } from '@/lib/utils'
 
 /**
- * Shared by the directory, the landing strip and the quiz results. Every
- * mentor reaching this card is `approved`, which means a person checked their
- * LinkedIn and ID — so the verified badge is unconditional rather than a flag.
+ * Shared by the directory, the landing strip and the quiz results.
  *
- * A ₹99 trial renders the amber CTA, a normal 1:1 renders blue. See the brand
- * rule in tokens.css.
+ * Every mentor reaching this card is `approved`, which means a person checked
+ * their LinkedIn and ID — so the verified badge is unconditional rather than a
+ * flag on the row.
+ *
+ * The band at the top takes its colour from where the mentor works, which is
+ * what stops a grid of these reading as one grey wall. A ₹99 trial renders the
+ * amber call to action, a normal 1:1 renders blue — the brand rule in
+ * tokens.css, and the reason company colours never borrow amber.
  */
 export function MentorCard({
   mentor,
@@ -26,39 +31,60 @@ export function MentorCard({
   compact?: boolean
   className?: string
 }) {
+  const tone = companyTone(mentor.company)
+
   return (
-    <Card interactive className={cn('flex flex-col', className)}>
-      <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
-        <div className="flex items-start gap-3">
-          <Avatar name={mentor.name} src={mentor.avatarUrl} size={compact ? 'md' : 'lg'} />
-          <div className="min-w-0 flex-1">
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="flex items-center gap-1 text-[0.9375rem] font-bold leading-tight">
-                <Link href={`/mentors/${mentor.id}`} className="hover:text-primary">
-                  {mentor.name}
-                </Link>
-                <BadgeCheck className="size-4 shrink-0 text-primary" aria-label="Verified mentor" />
-              </h3>
-              {mentor.ratingCount > 0 && (
-                <StarRating value={mentor.ratingAvg} count={mentor.ratingCount} />
-              )}
-            </div>
-            <p className="mt-0.5 text-sm font-semibold leading-snug text-primary">
-              {mentor.headline}
-            </p>
-            {mentor.collegeLine && (
-              <p className="mt-0.5 text-xs text-muted-foreground">{mentor.collegeLine}</p>
-            )}
-          </div>
+    <article
+      className={cn(
+        'group relative flex flex-col overflow-hidden rounded-[var(--radius-lg)] border border-border bg-surface shadow-[var(--shadow-card)]',
+        'transition-[transform,box-shadow,border-color] duration-300',
+        'hover:-translate-y-1 hover:border-primary/40 hover:shadow-[var(--shadow-pop)]',
+        'motion-reduce:transition-none motion-reduce:hover:translate-y-0',
+        className
+      )}
+    >
+      {/* the band, tinted by where they work */}
+      <div
+        className="h-16 w-full"
+        style={{ background: `linear-gradient(135deg, ${tone.bg}, transparent 140%)` }}
+        aria-hidden
+      />
+
+      <div className="flex flex-1 flex-col gap-3 px-4 pb-4 sm:px-5 sm:pb-5">
+        <div className="-mt-9 flex items-end justify-between gap-3">
+          <span className="rounded-full ring-4 ring-surface transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100">
+            <Avatar name={mentor.name} src={mentor.avatarUrl} size={compact ? 'lg' : 'xl'} />
+          </span>
+          {mentor.ratingCount > 0 && (
+            <StarRating value={mentor.ratingAvg} count={mentor.ratingCount} className="mb-1" />
+          )}
+        </div>
+
+        <div>
+          <h3 className="flex items-center gap-1 text-base font-bold leading-tight">
+            <Link href={`/mentors/${mentor.id}`} className="hover:text-primary">
+              <span className="absolute inset-0" aria-hidden />
+              {mentor.name}
+            </Link>
+            <BadgeCheck className="size-4 shrink-0 text-primary" aria-label="Verified mentor" />
+          </h3>
+          <p className="mt-0.5 text-sm font-semibold leading-snug text-primary">
+            {mentor.headline}
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-1.5">
+          <CompanyBadge company={mentor.company} />
+          {mentor.collegeLine && (
+            <span className="text-xs text-muted-foreground">{mentor.collegeLine}</span>
+          )}
         </div>
 
         {mentor.matchReasons && <MatchReasonChips reasons={mentor.matchReasons} />}
 
         <div className="flex flex-wrap gap-1.5">
           {mentor.firstGenGraduate && (
-            <Badge tone="amber">
-              <Sparkles aria-hidden /> First-Gen Grad
-            </Badge>
+            <Badge tone="amber"><Sparkles aria-hidden /> First-Gen Grad</Badge>
           )}
           {mentor.collegeTier && (
             <Badge tone="indigo">
@@ -72,8 +98,13 @@ export function MentorCard({
         </div>
 
         {!compact && mentor.breakthroughStory && (
-          <div className="rounded-[var(--radius-md)] bg-surface-muted p-3">
-            <p className="eyebrow mb-1 text-[0.625rem]">The Breakthrough Story</p>
+          <div
+            className="rounded-[var(--radius-md)] p-3"
+            style={{ background: tone.band }}
+          >
+            <p className="eyebrow mb-1 text-[0.625rem]" style={{ color: tone.fg }}>
+              The Breakthrough Story
+            </p>
             <p className="line-clamp-2-safe text-[0.8125rem] leading-relaxed text-muted-foreground">
               &ldquo;{mentor.breakthroughStory}&rdquo;
             </p>
@@ -89,7 +120,7 @@ export function MentorCard({
         )}
       </div>
 
-      <div className="flex items-end justify-between gap-3 border-t border-border-subtle p-4 sm:px-5">
+      <div className="relative flex items-end justify-between gap-3 border-t border-border-subtle p-4 sm:px-5">
         <div>
           <p className="text-[0.6875rem] font-medium text-subtle-foreground">1:1 Video Call</p>
           <p className="text-lg font-extrabold leading-tight">
@@ -99,7 +130,8 @@ export function MentorCard({
             </span>
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        {/* Sits above the card-wide link so these stay separately clickable. */}
+        <div className="relative z-10 flex items-center gap-2">
           {!compact && (
             <Button variant="outline" size="sm" asChild>
               <Link href={`/mentors/${mentor.id}`}>View Profile</Link>
@@ -112,6 +144,6 @@ export function MentorCard({
           </Button>
         </div>
       </div>
-    </Card>
+    </article>
   )
 }
