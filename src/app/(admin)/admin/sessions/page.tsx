@@ -7,13 +7,31 @@ import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/shared/states'
 import { LocalTime } from '@/components/shared/local-time'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getSessionUser } from '@/lib/session'
+import { JoinButton } from '@/components/bookings/join-button'
+import { StartNowButton } from '@/components/bookings/start-now-button'
+import { RescheduleControl } from '@/components/bookings/reschedule-control'
 import { formatINR } from '@/lib/utils'
 
 export const metadata: Metadata = { title: 'Sessions', robots: { index: false } }
 export const dynamic = 'force-dynamic'
 
-/** Every session on the platform, whoever is hosting it. */
+/**
+ * Every session on the platform, whoever is hosting it.
+ *
+ * An admin who hosts a session gets the same controls a mentor does — joining,
+ * rejoining, starting early, rescheduling — because for that session they ARE
+ * the mentor; ensure_host_profile() gave them a real approved mentor profile
+ * rather than inventing a second kind of session.
+ *
+ * For somebody else's session they get "View" and nothing more. Dropping
+ * silently into a stranger's private 1:1 is not a moderation tool, and the
+ * token route would refuse it anyway: it wants either the host or a confirmed
+ * seat. If a session needs intervening in, that is cancel_session() and a
+ * refund, which leaves a record.
+ */
 export default async function AdminSessionsPage() {
+  const me = await getSessionUser()
   const db = createAdminClient()
   const { data } = await db
     .from('sessions')
@@ -52,6 +70,7 @@ export default async function AdminSessionsPage() {
         <Card className="divide-y divide-border-subtle">
           {sessions.map((s) => {
             const short = s.status === 'scheduled' && s.seats_booked < s.min_seats
+            const hostedByMe = !!me && s.mentor_id === me.id
             return (
               <div key={s.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
                 <div className="min-w-0">
@@ -69,6 +88,7 @@ export default async function AdminSessionsPage() {
                         : s.status}
                     </Badge>
                     {short && <Badge tone="danger">Under minimum</Badge>}
+                    {hostedByMe && <Badge tone="indigo">You host this</Badge>}
                   </div>
                   <p className="mt-1.5 text-sm font-bold">{s.title}</p>
                   <p className="mt-0.5 flex flex-wrap items-center gap-x-3 text-xs text-muted-foreground">
@@ -79,9 +99,23 @@ export default async function AdminSessionsPage() {
                     <LocalTime iso={s.start_at} />
                   </p>
                 </div>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href={`/sessions/${s.id}`}>View</Link>
-                </Button>
+                <div className="flex flex-wrap items-center gap-2">
+                  {hostedByMe && s.status === 'scheduled' && (
+                    <>
+                      <JoinButton sessionId={s.id} startAt={s.start_at} endAt={s.end_at} />
+                      {s.type === 'one_on_one' && s.seats_booked > 0
+                        && new Date(s.start_at) > new Date() && (
+                        <>
+                          <StartNowButton sessionId={s.id} />
+                          <RescheduleControl sessionId={s.id} startAt={s.start_at} />
+                        </>
+                      )}
+                    </>
+                  )}
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/sessions/${s.id}`}>View</Link>
+                  </Button>
+                </div>
               </div>
             )
           })}
