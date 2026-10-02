@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
-import { Bell, Menu, Wallet, X } from 'lucide-react'
+import { Bell, LogOut, Menu, Wallet, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/ui/avatar'
 import { Logo } from '@/components/shared/logo'
 import { useSession } from '@/features/auth/use-session'
+import { useAuth } from '@/features/auth/auth-context'
 import { cn, formatINR } from '@/lib/utils'
 
 const NAV = [
@@ -16,6 +17,7 @@ const NAV = [
 
 export function Navbar() {
   const { user } = useSession()
+  const { logout } = useAuth()
   const [open, setOpen] = useState(false)
   const links = NAV.filter((l) => !('authOnly' in l && l.authOnly) || user)
 
@@ -73,6 +75,14 @@ export function Navbar() {
                   </span>
                 </span>
               </Link>
+              <button
+                type="button"
+                onClick={() => void logout()}
+                className="hidden rounded-full p-2 text-muted-foreground hover:bg-surface-muted hover:text-foreground sm:block"
+                aria-label="Log out"
+              >
+                <LogOut className="size-4" aria-hidden />
+              </button>
             </>
           ) : (
             <>

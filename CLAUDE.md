@@ -29,10 +29,13 @@ npm run dev            # client on :5173, proxies /api to :4000
 npm run dev:server     # API on :4000
 npm run build          # both workspaces
 npm run typecheck      # both workspaces
+npm run test           # server tests (vitest)
 ```
 
-To preview the signed-in navbar against the approved designs:
-`echo 'VITE_MOCK_SESSION=true' >> client/.env.local`
+Without `MONGODB_URI`, the API starts a temporary in-memory MongoDB — fine for local
+work, and everything is lost on restart. Set a real Atlas URI in `.env` to keep data.
+Google sign-in returns 503 until `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` are set;
+email links print to the server console until `RESEND_API_KEY` is set.
 
 ---
 
@@ -81,6 +84,11 @@ Section labels use the `.eyebrow` utility. Page bodies sit inside `.container-pa
 | `trialOffer` flag on a mentor | The designs show a "Book ₹99 Trial" amber CTA on one mentor. Needs a flag, not a price check. |
 | Credits chip in the navbar | Spec §6 has `CreditLedger` but never surfaces the balance. The designs put it in the navbar. |
 | Footer carries all nine legal/track links in one slim row | Designs show a slim footer; spec §8 P1.12 lists more links than it shows. Both satisfied. |
+| `bcryptjs` instead of `bcrypt` | Pure JS, no native build step. Same algorithm, no node-gyp on anyone's machine. |
+| Refresh revocation via a `tokenVersion` counter on `User` | Spec §6 has no token collection. A counter gives logout-everywhere and reset-invalidates-sessions without one. |
+| Auth Zod rules duplicated in `client/src/lib/validation.ts` and `server/src/schemas/` | A shared workspace would remove the drift risk but costs build complexity at V1 size. **Change both together.** |
+| `/complete-signup` page (not in spec §8) | Google never returns a date of birth, so a Google signup has to stop somewhere to collect DOB + the 18+ confirmation. Spec §8 A1 asks for this screen without naming a route. |
+| Dev server falls back to an in-memory MongoDB when `MONGODB_URI` is unset | `npm run dev:server` works offline before anyone has an Atlas account. Refuses to start in production without a real URI. |
 
 ## Where the designs and the spec disagree, the designs win
 
@@ -111,7 +119,8 @@ refund rules · no console errors.
 
 | | |
 |---|---|
-| Done | Monorepo scaffold · design tokens · base components (button, badge, card, accordion, avatar, states) · navbar + footer · mentor card · session card · **P1 Landing** |
+| Done | Monorepo scaffold · design tokens · base components · navbar + footer · mentor card · session card · **P1 Landing** · User model · **auth API** · **A1–A4 auth pages** · protected routes |
 | Placeholder | Every other route renders a stub naming its spec ID and week — see `app/router.tsx` |
 | Mock data | `lib/mock-data.ts` stands in for `GET /api/public/featured-mentors` and `GET /api/sessions`. Delete it when those land. |
-| Next | Spec §11 Week 1 — auth API, A1–A4 pages, User model |
+| Tests | 37 passing (`npm run test --workspace=server`): age maths, JWT/one-time tokens, and the auth API end to end |
+| Next | Spec §11 Week 1 — MentorProfile model, M1 mentor application, Cloudinary uploads |

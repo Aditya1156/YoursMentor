@@ -506,8 +506,8 @@ Dev roles (rename with your team): **Dev A** – public pages & design system ·
 ### Week 1 — Foundation
 - [ ] Repo, monorepo setup, lint/prettier, env, deploy pipelines (Vercel + Render) — **Dev D**
 - [x] Design tokens from the approved designs, base components, layout, navbar, footer — **Dev A**
-- [ ] User model, auth API (signup, login, refresh, logout, Google, verify, reset) — **Dev B**
-- [ ] A1–A4 auth pages — **Dev B**
+- [x] User model, auth API (signup, login, refresh, logout, Google, verify, reset) — **Dev B**
+- [x] A1–A4 auth pages — **Dev B**
 - [ ] MentorProfile model + M1 Mentor application + uploads — **Dev C**
 - [x] P1 Landing (static data first) — **Dev A**
 
