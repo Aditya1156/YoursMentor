@@ -243,3 +243,62 @@ select t('an unrelated mentor scores lower than a near peer',
                      '11111111-1111-1111-1111-111111111111')
   < public.match_score('22222222-0000-0000-0000-000000000005',
                        '11111111-1111-1111-1111-111111111111'));
+
+-- =============================================== RLS policy recursion ======
+-- sessions and bookings each used to reference the other in their policies,
+-- which Postgres rejects as infinite recursion — a 500 on every read of the
+-- table. The security definer helpers cut the cycle; this guards the fix.
+select fixture();
+create or replace function reads_without_recursion(tbl text) returns text
+language plpgsql as $$
+begin
+  execute format('select 1 from public.%I limit 1', tbl);
+  return 'PASS';
+exception when others then
+  return 'FAIL: ' || sqlerrm;
+end $$;
+
+set role anon;
+select t('anon can read sessions without policy recursion',
+  reads_without_recursion('sessions') = 'PASS');
+select t('anon can read bookings without policy recursion',
+  reads_without_recursion('bookings') = 'PASS');
+select t('anon can read chat_messages without policy recursion',
+  reads_without_recursion('chat_messages') = 'PASS');
+select t('anon sees no bookings at all',
+  (select count(*) from public.bookings) = 0);
+reset role;
+
+-- ============================================ privilege escalation =========
+-- A column-level REVOKE does nothing against a table-level grant, so these
+-- restrictions once existed only on paper: a mentor could set their own
+-- status to 'approved', and a student could set role = 'admin'.
+create or replace function granted_cols(tbl text, cols text[]) returns text
+language sql stable as $$
+  select string_agg(column_name, ', ')
+    from information_schema.column_privileges
+   where grantee = 'authenticated' and table_name = tbl
+     and privilege_type = 'UPDATE' and column_name = any(cols);
+$$;
+
+select t('a mentor cannot approve themselves or clear their strikes',
+  granted_cols('mentor_profiles',
+    array['status','rejection_reason','strikes','rating_avg','rating_count','sessions_completed'])
+  is null);
+
+select t('a mentor cannot fake seat counts or session status',
+  granted_cols('sessions', array['seats_booked','status','livekit_room','mentor_id']) is null);
+
+select t('a student cannot make themselves an admin',
+  granted_cols('profiles', array['role','status']) is null);
+
+select t('mentors can still edit their own profile fields', (
+  select count(*) >= 15 from information_schema.column_privileges
+   where grantee = 'authenticated' and table_name = 'mentor_profiles'
+     and privilege_type = 'UPDATE'));
+
+select t('seats and money are not client-writable', (
+  select count(*) = 0 from information_schema.role_table_grants
+   where grantee in ('authenticated','anon')
+     and privilege_type in ('INSERT','UPDATE','DELETE')
+     and table_name in ('bookings','payments','credit_ledger','payouts')));

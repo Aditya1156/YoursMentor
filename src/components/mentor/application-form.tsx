@@ -129,9 +129,11 @@ export function MentorApplicationForm({ initial }: { initial: MentorApplication 
       .from('mentor_profiles')
       .upsert(row, { onConflict: 'user_id' })
 
-    // Switch their account role so the mentor surfaces unlock on approval.
+    // `profiles.role` is not writable by clients — setting it from the browser
+    // would be the same path an attacker uses to become an admin. This
+    // function can only ever move student -> mentor, on your own row.
     if (!saveError) {
-      await supabase.from('profiles').update({ role: 'mentor' }).eq('id', user.id)
+      await supabase.rpc('become_mentor_applicant')
     }
 
     setBusy(false)

@@ -31,4 +31,13 @@ create or replace function storage.foldername(name text) returns text[]
   language sql immutable as $$ select string_to_array(name, '/') $$;
 
 grant usage on schema public, auth, storage to anon, authenticated, service_role;
-alter default privileges in schema public grant all on tables to authenticated, service_role;
+
+-- Supabase grants these broadly and relies on RLS as the gate. Mirroring it is
+-- what makes column-level REVOKE/GRANT behave here the way it does in the
+-- cloud — without it, a privilege bug is invisible locally.
+alter default privileges in schema public
+  grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema public
+  grant all on sequences to anon, authenticated, service_role;
+alter default privileges in schema public
+  grant execute on functions to anon, authenticated, service_role;
