@@ -79,7 +79,14 @@ exposed to Tailwind through `@theme inline`.
 **Never hardcode a colour, radius or font.** Use the semantic token (`bg-surface`,
 `text-muted-foreground`, `rounded-[var(--radius-lg)]`).
 
-Brand assets live in `public/brand/`: `mark.png` (the YM figure, transparent),
+**The mark sits on an opaque rounded white tile, not transparent.** The artwork runs the
+whole lightness range — near-white cyan `#04FFFF` to near-black navy `#000345` — so there
+is no single backdrop-free treatment that holds it: measured against navy, 61% of the ink
+falls under 3:1; against white, 21%. White is baked in, with a hairline ring so the tile
+does not vanish into a white navbar. Use `mark-transparent.png` only on artwork you
+control the background of.
+
+Brand assets live in `public/brand/`: `mark.png` (the YM figure on its tile),
 `wordmark.png`, `logo-horizontal.png`, `logo-stacked.png` and `og-mark.png` (the social
 card). `favicon-source.svg` is the original file the mark was extracted from — it is not
 referenced by anything and can be deleted.

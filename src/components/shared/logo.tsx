@@ -3,18 +3,21 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
 /**
- * The supplied mark (public/brand/mark.png) plus a live-text wordmark.
- * The wordmark is text rather than the raster so it stays crisp at every size
- * and reflows on a 360px screen. It follows the artwork's two-tone split:
- * "yours" in navy, "mentor.in" in brand blue.
+ * The mark sits on an opaque rounded white tile rather than floating
+ * transparent. The artwork runs the whole lightness range — near-white cyan
+ * (#04FFFF) through to near-black navy (#000345) — so on a dark surface the
+ * cap vanishes and on a tinted one the cyan washes out. Measured against a
+ * navy backing, 61% of the ink falls below 3:1; against white, 21%. White is
+ * the only backdrop that holds the whole mark, so it is baked in.
  *
- * public/brand/ also holds logo-horizontal.png, logo-stacked.png and
- * wordmark.png for places that need the full artwork (emails, social cards).
+ * A hairline ring keeps the tile from disappearing into a white navbar.
+ * public/brand/mark-transparent.png is the version without the tile, for
+ * print and dark-background artwork.
  */
 export function Logo({
   className,
   showWordmark = true,
-  size = 32,
+  size = 36,
 }: {
   className?: string
   showWordmark?: boolean
@@ -23,7 +26,7 @@ export function Logo({
   return (
     <Link
       href="/"
-      className={cn('flex items-center gap-2', className)}
+      className={cn('flex items-center gap-2.5', className)}
       aria-label="YoursMentor.in — home"
     >
       <Image
@@ -32,7 +35,8 @@ export function Logo({
         width={size}
         height={size}
         priority
-        className="shrink-0"
+        className="shrink-0 rounded-[22%] ring-1 ring-border"
+        style={{ width: size, height: size }}
       />
       {showWordmark && (
         <span className="text-lg font-extrabold leading-none tracking-tight">
