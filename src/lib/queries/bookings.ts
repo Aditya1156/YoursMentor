@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import type { BookingSummary, SessionSummary } from '@/lib/types'
+import type { BookingSummary, MentorSummary, SessionSummary } from '@/lib/types'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const toSession = (r: any): SessionSummary => {
@@ -136,7 +136,7 @@ export async function listNotifications(limit = 30) {
 }
 
 /** S1 — the matched mentors behind the quiz, with the reasons to show. */
-export async function matchedMentors(limit = 5) {
+export async function matchedMentors(limit = 5): Promise<MentorSummary[]> {
   const supabase = await createClient()
   const { data: matches } = await supabase.rpc('matched_mentors', { p_limit: limit })
   if (!matches?.length) return []
@@ -146,32 +146,32 @@ export async function matchedMentors(limit = 5) {
     .from('mentor_directory').select('*').in('id', ids)
 
   const byId = new Map((mentors ?? []).map((m: any) => [m.id, m]))
-  return matches
-    .map((m: any) => {
-      const r = byId.get(m.mentor_id)
-      if (!r) return null
-      return {
-        id: r.id, name: r.name,
-        avatarUrl: r.avatar_url ?? undefined,
-        headline: r.headline, company: r.company ?? undefined,
-        collegeLine: r.college_line ?? undefined,
-        collegeTier: r.college_tier ?? undefined,
-        homeState: r.home_state ?? undefined,
-        languages: r.languages ?? [],
-        firstGenGraduate: !!r.first_gen_graduate,
-        tracks: r.tracks ?? [], topics: r.topics ?? [],
-        breakthroughStory: r.breakthrough_story ?? undefined,
-        price1on1: r.price_1on1, session1on1Minutes: r.session_1on1_minutes,
-        trialOffer: !!r.trial_offer,
-        ratingAvg: Number(r.rating_avg ?? 0), ratingCount: r.rating_count ?? 0,
-        sessionsCompleted: r.sessions_completed ?? 0, country: r.country ?? 'India',
-        matchReasons: {
-          sameLanguage: !!m.same_language,
-          sameState: !!m.same_state,
-          tierStep: !!m.tier_step,
-          firstGen: !!m.first_gen,
-        },
-      }
+  const out: MentorSummary[] = []
+  for (const m of matches as any[]) {
+    const r = byId.get(m.mentor_id)
+    if (!r) continue
+    out.push({
+      id: r.id, name: r.name,
+      avatarUrl: r.avatar_url ?? undefined,
+      headline: r.headline, company: r.company ?? undefined,
+      collegeLine: r.college_line ?? undefined,
+      collegeTier: r.college_tier ?? undefined,
+      homeState: r.home_state ?? undefined,
+      languages: r.languages ?? [],
+      firstGenGraduate: !!r.first_gen_graduate,
+      tracks: r.tracks ?? [], topics: r.topics ?? [],
+      breakthroughStory: r.breakthrough_story ?? undefined,
+      price1on1: r.price_1on1, session1on1Minutes: r.session_1on1_minutes,
+      trialOffer: !!r.trial_offer,
+      ratingAvg: Number(r.rating_avg ?? 0), ratingCount: r.rating_count ?? 0,
+      sessionsCompleted: r.sessions_completed ?? 0, country: r.country ?? 'India',
+      matchReasons: {
+        sameLanguage: !!m.same_language,
+        sameState: !!m.same_state,
+        tierStep: !!m.tier_step,
+        firstGen: !!m.first_gen,
+      },
     })
-    .filter(Boolean)
+  }
+  return out
 }
