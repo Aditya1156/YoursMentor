@@ -180,11 +180,34 @@ print("=" * 70)
 print("THE RULES")
 print("=" * 70)
 
+# The floor is a platform setting, not a constant, so read it rather than
+# assuming. Both sides of it are checked: just under is refused, and the first
+# whole minute at or past it is accepted — that boundary is where a
+# datetime-local input, which has no seconds, actually lands.
+st, srow = call("/rest/v1/platform_settings?select=value&key=eq.reschedule_lead_time")
+floor_mins = int(srow[0]["value"].split()[0]) if srow else 30
+now_min = datetime.now(timezone.utc).replace(second=0, microsecond=0)
+
+if floor_mins > 1:
+    st, r = call("/rest/v1/rpc/request_reschedule", "POST",
+                 {"p_session": sid,
+                  "p_start_at": (now_min + timedelta(minutes=floor_mins - 1)).isoformat()},
+                 bearer=s_tok, key=PUB)
+    ok(f"a time under the {floor_mins}-minute floor is refused", st >= 400, msg(r))
+
 st, r = call("/rest/v1/rpc/request_reschedule", "POST",
-             {"p_session": sid, "p_start_at":
-              (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat()},
+             {"p_session": sid,
+              "p_start_at": (now_min + timedelta(minutes=floor_mins)).isoformat()},
              bearer=s_tok, key=PUB)
-ok("a time inside 30 minutes is refused", st >= 400, msg(r))
+ok(f"the first minute at the {floor_mins}-minute floor is accepted",
+   st == 200 and isinstance(r, str), msg(r) if st != 200 else "")
+if isinstance(r, str):
+    call("/rest/v1/rpc/withdraw_reschedule", "POST", {"p_request": r}, bearer=s_tok, key=PUB)
+
+st, r = call("/rest/v1/rpc/request_reschedule", "POST",
+             {"p_session": sid, "p_start_at": now_min.isoformat()},
+             bearer=s_tok, key=PUB)
+ok("the current minute itself is refused", st >= 400, msg(r))
 
 st, r = call("/rest/v1/rpc/request_reschedule", "POST",
              {"p_session": sid, "p_start_at":

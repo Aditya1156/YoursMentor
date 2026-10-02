@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
-  Bell, CalendarClock, CalendarX, Check, CheckCheck, CreditCard, Loader2, Star, X,
+  Bell, CalendarClock, CalendarX, Check, CheckCheck, CreditCard, Loader2, Star, Video, X,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -30,6 +30,7 @@ export interface PendingReschedule {
   proposedStart: string
   reason: string | null
   requestedByName: string
+  kind: string
 }
 
 export interface SentReschedule {
@@ -37,6 +38,7 @@ export interface SentReschedule {
   sessionTitle: string
   currentStart: string
   proposedStart: string
+  kind: string
 }
 
 const WHEN = new Intl.DateTimeFormat('en-IN', {
@@ -45,6 +47,7 @@ const WHEN = new Intl.DateTimeFormat('en-IN', {
 
 /** A small icon per kind, so the list is scannable rather than a wall of text. */
 function iconFor(type: string) {
+  if (type.startsWith('start_now')) return Video
   if (type.startsWith('reschedule')) return CalendarClock
   if (type.includes('cancel')) return CalendarX
   if (type.includes('confirm') || type.includes('payment')) return CreditCard
@@ -82,6 +85,39 @@ export function NotificationList({
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const unread = notifications.filter((n) => !n.read).length
+
+  const joinNow = useCallback(
+    async (requestId: string) => {
+      setBusy(requestId)
+      setError(null)
+      const { data, error: rpcError } = await createClient()
+        .rpc('accept_start_now', { p_request: requestId })
+      setBusy(null)
+      if (rpcError) {
+        setError(rpcError.message)
+        return
+      }
+      // Straight in — the room is what they just agreed to.
+      router.push(`/room/${data as string}`)
+    },
+    [router]
+  )
+
+  const declineNow = useCallback(
+    async (requestId: string) => {
+      setBusy(requestId)
+      setError(null)
+      const { error: rpcError } = await createClient()
+        .rpc('decline_start_now', { p_request: requestId })
+      setBusy(null)
+      if (rpcError) {
+        setError(rpcError.message)
+        return
+      }
+      router.refresh()
+    },
+    [router]
+  )
 
   const respond = useCallback(
     async (requestId: string, accept: boolean) => {
@@ -146,7 +182,50 @@ export function NotificationList({
             Needs your answer
           </h2>
           <ul className="mt-2 flex flex-col gap-3">
-            {pending.map((p) => (
+            {pending.map((p) => p.kind === 'start_now' ? (
+              <li key={p.requestId}>
+                <Card className="border-cta-group bg-cta-group/10 p-4">
+                  <div className="flex items-start gap-3">
+                    <Video className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[0.9375rem] font-bold leading-snug">
+                        {p.requestedByName} wants to start &ldquo;{p.sessionTitle}&rdquo; right now
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        They are online and waiting. Joining opens the room
+                        immediately — it does not change your booked time if you
+                        would rather not.
+                      </p>
+                      <p className="mt-1 text-xs text-subtle-foreground">
+                        Booked for {WHEN.format(new Date(p.currentStart))}. This
+                        request lapses after five minutes.
+                      </p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          variant="group"
+                          disabled={busy === p.requestId}
+                          onClick={() => void joinNow(p.requestId)}
+                        >
+                          {busy === p.requestId
+                            ? <Loader2 className="animate-spin" aria-hidden />
+                            : <Video aria-hidden />}
+                          Join now
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={busy === p.requestId}
+                          onClick={() => void declineNow(p.requestId)}
+                        >
+                          Not right now
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </li>
+            ) : (
               <li key={p.requestId}>
                 <Card className="border-accent bg-accent-soft p-4">
                   <div className="flex items-start gap-3">
@@ -220,13 +299,20 @@ export function NotificationList({
                 <Card className="flex flex-wrap items-center justify-between gap-3 border-dashed p-4">
                   <div className="min-w-0">
                     <p className="text-sm font-bold leading-snug">{s.sessionTitle}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      You asked to move it to{' '}
-                      <span className="font-semibold text-foreground">
-                        {WHEN.format(new Date(s.proposedStart))}
-                      </span>
-                      . Still on at {WHEN.format(new Date(s.currentStart))} until they agree.
-                    </p>
+                    {s.kind === 'start_now' ? (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        You asked them to start now. Reload once they accept, or wait
+                        on the session list and it will take you in.
+                      </p>
+                    ) : (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        You asked to move it to{' '}
+                        <span className="font-semibold text-foreground">
+                          {WHEN.format(new Date(s.proposedStart))}
+                        </span>
+                        . Still on at {WHEN.format(new Date(s.currentStart))} until they agree.
+                      </p>
+                    )}
                   </div>
                   <Button
                     size="sm"

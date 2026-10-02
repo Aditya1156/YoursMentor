@@ -49,8 +49,12 @@ export function RescheduleControl({
 }) {
   const router = useRouter()
   const [pending, setPending] = useState<Pending | null | undefined>(undefined)
+  // The floor lives in platform_settings so it can be changed without a deploy;
+  // the input must not be stricter than the server, or a time the server would
+  // accept cannot be picked. 2 minutes until the real value arrives.
+  const [floorMins, setFloorMins] = useState(2)
   const [open, setOpen] = useState(false)
-  const [when, setWhen] = useState(() => localInputValue(60))
+  const [when, setWhen] = useState(() => localInputValue(30))
   const [reason, setReason] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -80,8 +84,20 @@ export function RescheduleControl({
   useEffect(() => {
     let live = true
     void (async () => {
-      const { data } = await createClient().rpc('pending_reschedule', { p_session: sessionId })
+      const supabase = createClient()
+      const [{ data }, { data: setting }] = await Promise.all([
+        supabase.rpc('pending_reschedule', { p_session: sessionId }),
+        supabase
+          .from('platform_settings')
+          .select('value')
+          .eq('key', 'reschedule_lead_time')
+          .maybeSingle(),
+      ])
       if (!live) return
+      if (setting?.value) {
+        const m = /^(\d+)\s*(minute|hour)/.exec(setting.value)
+        if (m) setFloorMins(Number(m[1]) * (m[2] === 'hour' ? 60 : 1))
+      }
       const row = (data ?? [])[0]
       setPending(
         row
@@ -242,7 +258,7 @@ export function RescheduleControl({
         id={`when-${sessionId}`}
         type="datetime-local"
         value={when}
-        min={localInputValue(30)}
+        min={localInputValue(floorMins)}
         onChange={(e) => setWhen(e.target.value)}
         className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-surface px-2 py-1.5 text-sm"
       />
@@ -258,7 +274,8 @@ export function RescheduleControl({
         className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-surface px-2 py-1.5 text-sm"
       />
       <p className="mt-2 text-xs text-muted-foreground">
-        The other person has to accept before anything changes.
+        At least {floorMins === 1 ? 'a minute' : `${floorMins} minutes`} from now. The other
+        person has to accept before anything changes.
       </p>
       {error && <p className="mt-2 text-xs font-semibold text-danger">{error}</p>}
       <div className="mt-3 flex gap-2">

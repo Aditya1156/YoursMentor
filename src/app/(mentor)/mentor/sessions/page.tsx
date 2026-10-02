@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/shared/states'
 import { LocalTime } from '@/components/shared/local-time'
 import { RescheduleControl } from '@/components/bookings/reschedule-control'
+import { StartNowButton } from '@/components/bookings/start-now-button'
 import { mentorSessions } from '@/lib/queries/mentor-dashboard'
 import { formatINR } from '@/lib/utils'
 
@@ -92,7 +93,10 @@ export default async function MentorSessionsPage({
                       && s.status === 'scheduled'
                       && s.seatsBooked > 0
                       && new Date(s.startAt) > new Date() && (
-                      <RescheduleControl sessionId={s.id} startAt={s.startAt} />
+                      <>
+                        <StartNowButton sessionId={s.id} />
+                        <RescheduleControl sessionId={s.id} startAt={s.startAt} />
+                      </>
                     )}
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/mentor/sessions/${s.id}`}>

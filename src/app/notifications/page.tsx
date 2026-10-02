@@ -56,6 +56,7 @@ export default async function NotificationsPage() {
     proposedStart: r.proposed_start,
     reason: r.reason ?? null,
     requestedByName: r.requested_by_name,
+    kind: r.kind ?? 'reschedule',
   }))
 
   const sent: SentReschedule[] = (sentRes.data ?? []).map((r: any) => ({
@@ -63,6 +64,7 @@ export default async function NotificationsPage() {
     sessionTitle: r.session_title,
     currentStart: r.current_start,
     proposedStart: r.proposed_start,
+    kind: r.kind ?? 'reschedule',
   }))
   /* eslint-enable @typescript-eslint/no-explicit-any */
 

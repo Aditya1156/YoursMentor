@@ -8,6 +8,7 @@ import { LocalTime } from '@/components/shared/local-time'
 import { CancelBookingButton } from '@/components/bookings/cancel-booking-button'
 import { JoinButton } from '@/components/bookings/join-button'
 import { RescheduleControl } from '@/components/bookings/reschedule-control'
+import { StartNowButton } from '@/components/bookings/start-now-button'
 import { BOOKING_LABEL } from '@/lib/types'
 import type { BookingRowData } from '@/lib/queries/bookings'
 import { formatINR } from '@/lib/utils'
@@ -80,7 +81,12 @@ export function BookingRow({ booking }: { booking: BookingRowData }) {
         {s.type === 'one_on_one'
           && booking.status === 'confirmed'
           && new Date(s.startAt) > new Date() && (
-          <RescheduleControl sessionId={s.id} startAt={s.startAt} className="w-full sm:w-auto" />
+          <>
+            {/* If the mentor happens to be free, there is no reason to wait for
+                the booked time. */}
+            <StartNowButton sessionId={s.id} className="w-full sm:w-auto" />
+            <RescheduleControl sessionId={s.id} startAt={s.startAt} className="w-full sm:w-auto" />
+          </>
         )}
 
         {booking.status === 'attended' && !booking.hasReview && (
