@@ -51,6 +51,10 @@ These decisions simplify V1. Do **not** build the deferred items.
 
 ## 3. Tech stack (all free tiers)
 
+> **SUPERSEDED 2026-10-02.** The project moved to Next.js 16 + Supabase (Postgres,
+> Auth, Storage) on Vercel. See the stack and decisions table in `CLAUDE.md`; that
+> file wins wherever it disagrees with this section. Sections 1–2 and 5–14 still apply.
+
 | Layer | Choice |
 |---|---|
 | Frontend | React 18 + Vite + TypeScript + Tailwind CSS + React Router + TanStack Query + React Hook Form + Zod |

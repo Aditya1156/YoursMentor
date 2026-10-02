@@ -1,11 +1,11 @@
 # OneStep — near-peer mentorship platform
 
-**The full spec lives in [`docs/MASTER_PROMPT.md`](docs/MASTER_PROMPT.md). Read it before
-building any page.** This file holds only what the spec leaves open, what has been
-decided since, and where things live.
+**The product spec lives in [`docs/MASTER_PROMPT.md`](docs/MASTER_PROMPT.md). Read it
+before building any page.** This file holds the stack as actually built, what the spec
+leaves open, and what has been decided since.
 
-Background reading: [`docs/build-guide.pdf`](docs/build-guide.pdf) — the original research
-doc the spec was written from (video SDK comparison, DPDP/GST notes, cost model).
+Background: [`docs/build-guide.pdf`](docs/build-guide.pdf) — the research doc the spec
+came from (video SDK comparison, DPDP/GST notes, cost model).
 
 ---
 
@@ -16,61 +16,95 @@ sessions** with near-peer mentors — people 1–3 steps ahead, from similar col
 home states and languages. Video happens inside the site. Two tracks: **First Job /
 Internship** and **Going Abroad**.
 
-Audience assumption that drives every decision: an Android phone on mobile data in a
-hostel room, not a MacBook on campus wifi.
+Audience assumption behind every decision: an Android phone on mobile data in a hostel
+room, not a MacBook on campus wifi.
 
 ---
 
-## Commands
+## Stack
+
+Next.js 16 (app router) · React 19 · TypeScript · Tailwind v4 · Supabase (Postgres +
+Auth + Storage) · Zod · deployed on Vercel.
+
+**This replaces the spec's §3 stack** (Vite + Express + MongoDB + hand-rolled JWT). The
+reasons are in the decisions table below. Where §3 and this file disagree, this file wins.
 
 ```bash
-npm install            # once, at the repo root (npm workspaces)
-npm run dev            # client on :5173, proxies /api to :4000
-npm run dev:server     # API on :4000
-npm run build          # both workspaces
-npm run typecheck      # both workspaces
-npm run test           # server tests (vitest)
+npm install
+npm run dev        # http://localhost:3000
+npm run typecheck
+npm run lint
+npm run build
+npm run gate       # all four
 ```
 
-Without `MONGODB_URI`, the API starts a temporary in-memory MongoDB — fine for local
-work, and everything is lost on restart. Set a real Atlas URI in `.env` to keep data.
-Google sign-in returns 503 until `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` are set;
-email links print to the server console until `RESEND_API_KEY` is set.
+`.env.local` holds the Supabase URL and publishable key (gitignored). The
+`SUPABASE_SERVICE_ROLE_KEY` is still blank — needed from Week 3 for Razorpay webhooks,
+LiveKit tokens and cron jobs.
 
 ---
 
 ## Layout
 
 ```
-/client/src
-  /app          router, providers, root layout
-  /pages        one folder per page from spec §8
-  /components   ui/ (primitives) · layout/ (navbar, footer) · shared/ (domain cards)
-  /features     auth/, mentors/, bookings/, sessions/, payments/, admin/
-  /lib          types.ts, utils.ts, mock-data.ts (delete when APIs land)
-  /styles       tokens.css ← the design system, globals.css
-/server/src     config/ models/ routes/ controllers/ services/ middleware/ jobs/
-/docs           MASTER_PROMPT.md, build-guide.pdf
+src/
+  app/
+    layout.tsx, page.tsx, globals.css, tokens.css ← the design system
+    (auth)/     signup · signin · reset · update-password · complete-profile
+    auth/       callback (PKCE, Google) · confirm (email links)
+    <route>/    one folder per page from spec §8
+  components/
+    ui/         button, badge, card, accordion, avatar, input
+    layout/     navbar (server) + navbar-client, footer
+    shared/     logo, mentor-card, session-card, section-heading, states
+    auth/       one form per auth screen
+    landing/    landing-sections, faq
+  lib/
+    supabase/   client (browser) · server (RSC/actions) · admin (service role)
+    session.ts  getSessionUser(), homeFor()
+    utils.ts · types.ts · validation.ts · mock-data.ts
+  proxy.ts      session refresh + route guards (Next 16's middleware)
+supabase/migrations/
 ```
 
 ---
 
 ## Design system
 
-Everything is in [`client/src/styles/tokens.css`](client/src/styles/tokens.css). Tokens
-are CSS custom properties exposed to Tailwind through `@theme inline`.
+All tokens are in [`src/app/tokens.css`](src/app/tokens.css) as CSS custom properties,
+exposed to Tailwind through `@theme inline`.
 
-**Never hardcode a colour, radius or font.** Use the semantic token
-(`bg-surface`, `text-muted-foreground`, `rounded-[var(--radius-lg)]`).
+**Never hardcode a colour, radius or font.** Use the semantic token (`bg-surface`,
+`text-muted-foreground`, `rounded-[var(--radius-lg)]`).
 
-**The brand rule:** amber (`--cta-group`) means ₹99 group session. Indigo
-(`--cta-1on1`, also `--primary`) means paid 1:1 and every other primary action. Choose
-`<Button variant="group">` vs `<Button variant="primary">` based on what the button
-books, not on how it looks. A student should be able to tell the two paths apart
-without reading.
+**The brand rule:** amber (`--cta-group`) means ₹99 group session. Indigo (`--cta-1on1`,
+also `--primary`) means paid 1:1 and every other primary action. Choose
+`<Button variant="group">` vs `<Button variant="primary">` by what the button books, not
+by how it looks. A student should tell the two paths apart without reading.
 
-Section labels use the `.eyebrow` utility. Page bodies sit inside `.container-page`
-(16px gutter at 360px, 1240px max).
+Section labels use `.eyebrow`. Page bodies sit inside `.container-page` (16px gutter at
+360px, 1240px max).
+
+---
+
+## Auth and the 18+ gate
+
+Supabase Auth owns credentials, email confirmation, password reset and Google OAuth.
+`public.profiles` owns everything about the person, one row per `auth.users` row, created
+by the `handle_new_user()` trigger.
+
+V1 is **18+ only** (spec §2). That is enforced in three places, deliberately:
+
+1. `dateOfBirthField` in `lib/validation.ts` — so the user hears about it immediately.
+2. The `adult_needs_dob` **check constraint** on `public.profiles` — no client path can
+   write an under-18 profile, whatever the form allowed.
+3. `src/proxy.ts` — parks any account without `is_adult_confirmed` at `/complete-profile`
+   before it can reach a protected page.
+
+An **email sign-up** sends its date of birth through Supabase sign-up metadata, which the
+trigger writes straight into the profile — so confirming the email on a different device
+from the one you signed up on still works. A **Google sign-in** carries no date of birth,
+so it is the only path that lands on `/complete-profile`.
 
 ---
 
@@ -78,26 +112,23 @@ Section labels use the `.eyebrow` utility. Page bodies sit inside `.container-pa
 
 | Decision | Why |
 |---|---|
-| **Tailwind v4** with `@tailwindcss/vite` and CSS-first `@theme`, no `tailwind.config.js` | Spec §3 said "mapped in tailwind.config"; v4 replaced that file with `@theme` in CSS. shadcn/ui supports v4. Same outcome, less config. |
-| Radix primitives written directly into `components/ui/` rather than `npx shadcn add` | No `tailwind.config.js` for the CLI to patch, and we only need five primitives. Same Radix underneath. |
-| `breakthroughStory` is a first-class `MentorProfile` field | The designs make it a distinct quoted block on every mentor card, not part of the bio. Needs its own field and char limit. |
-| `trialOffer` flag on a mentor | The designs show a "Book ₹99 Trial" amber CTA on one mentor. Needs a flag, not a price check. |
-| Credits chip in the navbar | Spec §6 has `CreditLedger` but never surfaces the balance. The designs put it in the navbar. |
-| Footer carries all nine legal/track links in one slim row | Designs show a slim footer; spec §8 P1.12 lists more links than it shows. Both satisfied. |
-| `bcryptjs` instead of `bcrypt` | Pure JS, no native build step. Same algorithm, no node-gyp on anyone's machine. |
-| Refresh revocation via a `tokenVersion` counter on `User` | Spec §6 has no token collection. A counter gives logout-everywhere and reset-invalidates-sessions without one. |
-| Auth Zod rules duplicated in `client/src/lib/validation.ts` and `server/src/schemas/` | A shared workspace would remove the drift risk but costs build complexity at V1 size. **Change both together.** |
-| `/complete-signup` page (not in spec §8) | Google never returns a date of birth, so a Google signup has to stop somewhere to collect DOB + the 18+ confirmation. Spec §8 A1 asks for this screen without naming a route. |
-| Dev server falls back to an in-memory MongoDB when `MONGODB_URI` is unset | `npm run dev:server` works offline before anyone has an Atlas account. Refuses to start in production without a real URI. |
+| **Supabase instead of MongoDB + hand-rolled JWT auth** | RattaMaro already runs it, so one mental model across both projects. Postgres fits the booking domain — seat holds, capacity, unique `(session_id, student_id)` — far better than documents. Supabase Auth deletes the auth code we would otherwise own. |
+| **Next.js instead of Vite + Express** | One deploy target, matches RattaMaro. Route handlers cover the Razorpay webhook and LiveKit token minting; Vercel Cron covers hold expiry. |
+| **Tailwind v4**, `@theme` in CSS, no `tailwind.config.js` | v4 replaced that file. Same outcome, less config. |
+| Radix primitives written into `components/ui/` rather than `npx shadcn add` | No `tailwind.config.js` for the CLI to patch, and we need five primitives. Same Radix underneath. |
+| `src/lib/supabase/*`, not the quickstart's `utils/supabase/*` | Matches RattaMaro exactly. |
+| `breakthrough_story` is its own column | The designs make it a distinct quoted block on every mentor card, not part of the bio. |
+| `trial_offer` flag on `mentor_profiles` | The designs show a "Book ₹99 Trial" amber CTA on one mentor. That is a flag, not a price check. |
+| Credits chip in the navbar | Spec §6 has a credit ledger but never surfaces the balance. The designs put it in the navbar. |
+| DOB travels in sign-up metadata, not browser storage | A confirmation email is often opened on a different device from the sign-up. Browser storage breaks there; metadata does not. |
 
 ## Where the designs and the spec disagree, the designs win
 
-Log the divergence in the table above and keep going. Do not silently follow the spec
-over an approved comp.
+Log the divergence above and keep going. Never silently follow the spec over an approved comp.
 
 ---
 
-## Hard rules (from spec §2 — never break)
+## Hard rules (spec §2 — never break)
 
 - Never store card or bank details. Razorpay holds them; we keep IDs only.
 - All sessions on-platform or on a company-owned link. Never a mentor's personal link.
@@ -105,13 +136,16 @@ over an approved comp.
 - Mentors share experience only — no medical, legal, visa or immigration advice.
   Track 2 pages must show this notice.
 - No ad pixels or tracking scripts in V1.
-- 18+ only at launch. Under-18 needs a real DPDP parental-consent flow — V2.
+- 18+ only at launch.
 
 ## Quality bar (spec §10 and §13 — every page)
 
-Zod on client *and* server · role check on every protected route · loading, empty and
-error states on every list · works at 360px · tests for slot generation, match score and
-refund rules · no console errors.
+Zod on the client **and** a constraint or RLS policy in the database · RLS on every table ·
+loading, empty and error states on every list · works at 360px · `npm run gate` clean.
+
+**RLS protects reads. It is not where booking or payment logic lives** — those run
+server-side with the service-role client in `lib/supabase/admin.ts`, which bypasses RLS
+and must never be imported into a Client Component.
 
 ---
 
@@ -119,8 +153,21 @@ refund rules · no console errors.
 
 | | |
 |---|---|
-| Done | Monorepo scaffold · design tokens · base components · navbar + footer · mentor card · session card · **P1 Landing** · User model · **auth API** · **A1–A4 auth pages** · protected routes |
-| Placeholder | Every other route renders a stub naming its spec ID and week — see `app/router.tsx` |
-| Mock data | `lib/mock-data.ts` stands in for `GET /api/public/featured-mentors` and `GET /api/sessions`. Delete it when those land. |
-| Tests | 37 passing (`npm run test --workspace=server`): age maths, JWT/one-time tokens, and the auth API end to end |
-| Next | Spec §11 Week 1 — MentorProfile model, M1 mentor application, Cloudinary uploads |
+| Done | Design tokens · base components · navbar + footer · mentor card · session card · **P1 Landing** · initial migration (profiles, mentor_profiles, RLS, storage buckets) · **A1–A4 auth on Supabase** · route guards |
+| Not yet applied | The migration has **not** been run against the cloud project — see below |
+| Placeholder | Every other route renders a stub naming its spec ID and week |
+| Mock data | `lib/mock-data.ts` still feeds the landing page. Replace when the mentors query lands. |
+| Next | Spec §11 Week 1 — M1 mentor application + Supabase Storage uploads; then P2 directory |
+
+### Applying the migration
+
+Nothing in `supabase/migrations/` has run against `bmyzudohkgxdnifpyanv` yet. Either:
+
+```bash
+npm i -g supabase
+supabase link --project-ref bmyzudohkgxdnifpyanv
+supabase db push
+```
+
+or paste `supabase/migrations/20261002000001_init.sql` into the SQL editor in the
+Supabase dashboard. Google sign-in also needs enabling under Authentication → Providers.
