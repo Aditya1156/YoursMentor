@@ -141,7 +141,7 @@ export function MentorApplicationForm({ initial }: { initial: MentorApplication 
       setError(saveError.message)
       return
     }
-    router.push('/mentor/apply')
+    router.push('/apply-to-mentor')
     router.refresh()
   }
 

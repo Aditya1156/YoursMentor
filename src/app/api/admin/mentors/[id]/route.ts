@@ -73,8 +73,8 @@ export async function POST(
 
   const notice = {
     approve: ['Your mentor application is approved', 'You can set availability and create ₹99 rooms now.', '/mentor'],
-    reject: ['We could not approve your application', reason?.trim() ?? '', '/mentor/apply'],
-    suspend: ['Your mentor account is suspended', 'Write to support@yoursmentor.in and we will go through it.', '/mentor/apply'],
+    reject: ['We could not approve your application', reason?.trim() ?? '', '/apply-to-mentor'],
+    suspend: ['Your mentor account is suspended', 'Write to support@yoursmentor.in and we will go through it.', '/apply-to-mentor'],
     reinstate: ['Your mentor account is active again', 'Your sessions are visible to students once more.', '/mentor'],
   }[action as 'approve' | 'reject' | 'suspend' | 'reinstate']
 

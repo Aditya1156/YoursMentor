@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic'
 /** M1 — Mentor application. */
 export default async function MentorApplyPage() {
   const user = await getSessionUser()
-  if (!user) redirect('/signin?next=/mentor/apply')
+  if (!user) redirect('/signin?next=/apply-to-mentor')
 
   const application = await myMentorApplication().catch(() => null)
 

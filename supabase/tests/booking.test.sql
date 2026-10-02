@@ -302,3 +302,46 @@ select t('seats and money are not client-writable', (
    where grantee in ('authenticated','anon')
      and privilege_type in ('INSERT','UPDATE','DELETE')
      and table_name in ('bookings','payments','credit_ledger','payouts')));
+
+-- ============================================== mentor tools ===============
+-- mark_attendance once built its new status with a CASE that yielded `text`,
+-- which Postgres refuses to assign to a booking_status column. It compiled
+-- and only failed when the branch actually ran.
+select fixture();
+select as_student(1);
+select public.hold_seat('33333333-3333-3333-3333-333333333333') as mb \gset
+select public.confirm_booking(:'mb', 'p', 'o');
+update public.sessions set start_at = now() - interval '1 hour',
+                           end_at = now() + interval '1 hour';
+
+select set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', false);
+
+create or replace function try_mark(b uuid, attended boolean) returns text
+language plpgsql as $$
+begin
+  perform public.mark_attendance(b, attended);
+  return 'ok';
+exception when others then return 'error: ' || sqlerrm;
+end $$;
+
+select t('a mentor can mark a student attended', try_mark(:'mb', true) = 'ok');
+select t('the booking really moved to attended',
+  (select status from public.bookings where id = :'mb') = 'attended');
+select t('a mentor can mark a no-show', try_mark(:'mb', false) = 'ok');
+select t('a no-show is recorded as such',
+  (select status from public.bookings where id = :'mb') = 'no_show_student');
+
+select as_student(2);
+select t('another student cannot mark attendance', try_mark(:'mb', true) like 'error:%');
+
+-- mentor_earnings only counts completed sessions, so close it first.
+select set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', false);
+update public.sessions set end_at = now() - interval '30 minutes';
+select public.complete_finished_sessions();
+
+select t('a no-show still earns the mentor, because they showed up', (
+  select net = 75 from public.mentor_earnings(25) limit 1));
+select t('the platform share is taken off the gross', (
+  select gross = 99 and platform_fee = 24 from public.mentor_earnings(25) limit 1));
+select t('a cancelled seat earns nothing', (
+  select coalesce((select seats_paid from public.mentor_earnings(25) limit 1), 0) = 1));

@@ -69,7 +69,7 @@ export function SignUpForm({ role }: { role: 'student' | 'mentor' }) {
           accepted_terms: true,
         },
         emailRedirectTo: `${window.location.origin}/auth/confirm?next=${
-          role === 'mentor' ? '/mentor/apply' : '/onboarding'
+          role === 'mentor' ? '/apply-to-mentor' : '/onboarding'
         }`,
       },
     })
@@ -110,7 +110,7 @@ export function SignUpForm({ role }: { role: 'student' | 'mentor' }) {
 
   return (
     <>
-      <GoogleButton role={role} next={role === 'mentor' ? '/mentor/apply' : '/onboarding'} />
+      <GoogleButton role={role} next={role === 'mentor' ? '/apply-to-mentor' : '/onboarding'} />
       <AuthDivider />
 
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
