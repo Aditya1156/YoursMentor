@@ -16,15 +16,25 @@ export function Logo({
   className,
   showWordmark = true,
   size = 36,
+  tone = 'dark',
+  stacked = false,
 }: {
   className?: string
   showWordmark?: boolean
   size?: number
+  /** `light` for the wordmark on a dark panel, where the usual navy vanishes. */
+  tone?: 'dark' | 'light'
+  /** Mark above the wordmark, both centred. For the auth panels. */
+  stacked?: boolean
 }) {
   return (
     <Link
       href="/"
-      className={cn('flex items-center gap-2.5', className)}
+      className={cn(
+        'flex',
+        stacked ? 'flex-col items-center gap-3' : 'items-center gap-2.5',
+        className
+      )}
       aria-label="YoursMentor.in — home"
     >
       <Image
@@ -37,9 +47,18 @@ export function Logo({
         style={{ width: size, height: size }}
       />
       {showWordmark && (
-        <span className="text-lg font-extrabold leading-none tracking-tight">
-          <span className="text-foreground">yours</span>
-          <span className="text-primary">mentor.in</span>
+        <span
+          className={cn(
+            'font-extrabold leading-none tracking-tight',
+            stacked ? 'text-2xl' : 'text-lg'
+          )}
+        >
+          <span className={tone === 'light' ? 'text-white' : 'text-foreground'}>yours</span>
+          <span
+            className={tone === 'light' ? 'text-[var(--cyan-on-dark)]' : 'text-primary'}
+          >
+            mentor.in
+          </span>
         </span>
       )}
     </Link>

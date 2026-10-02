@@ -30,7 +30,8 @@ export default async function JoinPage() {
 
   return (
     <div className="min-h-[calc(100dvh-4rem)]">
-      <div className="container-page flex flex-col items-center gap-2 pt-8 text-center md:pt-12">
+      <div className="container-page flex flex-col items-center gap-3 pt-8 text-center md:pt-12">
+        <Logo stacked size={64} className="mb-1" />
         <h1 className="text-[1.75rem] leading-tight sm:text-4xl">
           Which side are you on?
         </h1>
@@ -139,7 +140,6 @@ export default async function JoinPage() {
             Log in
           </Link>
         </p>
-        <Logo showWordmark={false} size={28} className="opacity-40" />
       </div>
     </div>
   )

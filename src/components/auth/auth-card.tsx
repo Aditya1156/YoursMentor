@@ -57,7 +57,7 @@ export function AuthCard({
         )}
 
         <div
-          className={`mx-auto flex w-full flex-col justify-center ${
+          className={`mx-auto flex w-full flex-col ${
             aside ? 'max-w-lg lg:max-w-none' : 'max-w-md'
           } ${
             aside
@@ -67,27 +67,33 @@ export function AuthCard({
               : 'auth-in-right'
           }`}
         >
-          <Card className="p-6 shadow-[var(--shadow-raised)] sm:p-7">
+          {/* The footer and the 18+ line live inside the card rather than
+              under it. Outside, they made this column taller than the panel
+              beside it, so the two halves never lined up. */}
+          <Card className="flex flex-1 flex-col justify-center p-6 shadow-[var(--shadow-raised)] sm:p-7">
             <h1 className="text-2xl">{title}</h1>
             {subtitle && (
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
                 {subtitle}
               </p>
             )}
+
             <div className="mt-5">{children}</div>
+
+            {footer && (
+              <p className="mt-5 border-t border-border-subtle pt-4 text-center text-sm text-muted-foreground">
+                {footer}
+              </p>
+            )}
+
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-subtle-foreground">
+              <ShieldCheck className="size-3.5" aria-hidden />
+              YoursMentor is 18+ only right now.{' '}
+              <Link href="/privacy" className="font-semibold text-primary hover:underline">
+                Privacy
+              </Link>
+            </p>
           </Card>
-
-          {footer && (
-            <p className="mt-4 text-center text-sm text-muted-foreground">{footer}</p>
-          )}
-
-          <p className="mt-5 flex items-center justify-center gap-1.5 text-xs text-subtle-foreground">
-            <ShieldCheck className="size-3.5" aria-hidden />
-            YoursMentor is 18+ only right now.{' '}
-            <Link href="/privacy" className="font-semibold text-primary hover:underline">
-              Privacy
-            </Link>
-          </p>
         </div>
       </div>
     </div>
@@ -123,7 +129,7 @@ export function AuthAside({
 }) {
   return (
     <div
-      className="relative flex w-full flex-col justify-center overflow-hidden rounded-[var(--radius-xl)] border border-[var(--navy-800)] p-7 text-white"
+      className="relative flex w-full flex-1 flex-col justify-center overflow-hidden rounded-[var(--radius-xl)] border border-[var(--navy-800)] p-7 text-white"
       style={{ background: 'var(--brand-gradient-deep)' }}
     >
       <span
@@ -136,11 +142,17 @@ export function AuthAside({
       />
 
       <div className="relative">
-        <Logo showWordmark={false} size={36} />
-        <p className="mt-5 text-xs font-bold uppercase tracking-[0.12em] text-[var(--cyan-on-dark)]">
-          {eyebrow}
-        </p>
-        <h2 className="mt-2 text-2xl leading-tight text-white">{title}</h2>
+        {/* The panel's anchor. Big enough to be the brand rather than a
+            bookmark, and centred with the lines that introduce the page —
+            the list below stays left-aligned, because centred bullets are
+            hard to scan. */}
+        <div className="flex flex-col items-center text-center">
+          <Logo stacked tone="light" size={64} />
+          <p className="mt-5 text-xs font-bold uppercase tracking-[0.12em] text-[var(--cyan-on-dark)]">
+            {eyebrow}
+          </p>
+          <h2 className="mt-2 text-2xl leading-tight text-white">{title}</h2>
+        </div>
 
         <ul className="mt-5 flex flex-col gap-3">
           {points.map(({ icon: Icon, text }) => (
