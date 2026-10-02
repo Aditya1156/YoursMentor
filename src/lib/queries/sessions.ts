@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/public'
 import type { SessionSummary, Track } from '@/lib/types'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -39,7 +40,8 @@ export interface SessionFilters {
 
 /** P4 — upcoming group sessions. */
 export async function listGroupSessions(f: SessionFilters = {}) {
-  const supabase = await createClient()
+  // Public listing: the same rows for everybody, signed in or not.
+  const supabase = createPublicClient()
   let query = supabase
     .from('sessions')
     .select(WITH_MENTOR)

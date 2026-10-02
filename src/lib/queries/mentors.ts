@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/public'
 import type { CollegeTier, MentorDetail, MentorSummary, Track } from '@/lib/types'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -54,7 +55,9 @@ export const PER_PAGE = 9
 /** P2 — the mentor directory. Reads the `mentor_directory` view, which already
  *  filters to approved mentors on active accounts. */
 export async function listMentors(f: MentorFilters = {}) {
-  const supabase = await createClient()
+  // Nothing here depends on who is asking, so no cookies and no forced
+  // per-request render.
+  const supabase = createPublicClient()
   const page = Math.max(1, f.page ?? 1)
   const perPage = f.perPage ?? PER_PAGE
   const from = (page - 1) * perPage
@@ -102,7 +105,7 @@ export async function listMentors(f: MentorFilters = {}) {
 
 /** The featured strip on the landing page. */
 export async function featuredMentors(limit = 3) {
-  const supabase = await createClient()
+  const supabase = createPublicClient()
   const { data } = await supabase
     .from('mentor_directory')
     .select('*')
