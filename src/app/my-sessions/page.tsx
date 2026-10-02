@@ -1,12 +1,11 @@
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { CalendarCheck } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { EmptyState, ErrorState } from '@/components/shared/states'
 import { BookingRow } from '@/components/bookings/booking-row'
 import { myBookingsByTab, creditBalance } from '@/lib/queries/bookings'
-import { getSessionUser } from '@/lib/session'
+import { requireStudent } from '@/lib/session'
 import { formatINR } from '@/lib/utils'
 
 export const metadata: Metadata = { title: 'My sessions' }
@@ -16,8 +15,7 @@ export const dynamic = 'force-dynamic'
 export default async function MySessionsPage({
   searchParams,
 }: { searchParams: Promise<{ tab?: string }> }) {
-  const viewer = await getSessionUser()
-  if (!viewer) redirect('/signin?next=/my-sessions')
+  await requireStudent('/my-sessions')
 
   const { tab = 'upcoming' } = await searchParams
 

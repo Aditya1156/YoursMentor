@@ -3,11 +3,12 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { CalendarClock, Loader2, Users, Zap } from 'lucide-react'
+import { Loader2, Users, Zap } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ErrorBanner } from '@/components/auth/error-banner'
+import { SlotPicker } from '@/components/mentors/slot-picker'
 import { createClient } from '@/lib/supabase/client'
 import { cn, formatINR, formatSessionTime } from '@/lib/utils'
 
@@ -113,14 +114,13 @@ export function BookingPanel({
               hours ahead.
             </p>
 
-            <div className="rounded-[var(--radius-md)] border border-dashed border-border bg-surface-muted p-4 text-center">
-              <CalendarClock className="mx-auto size-5 text-subtle-foreground" aria-hidden />
-              <p className="mt-2 text-sm font-semibold">Slot picker coming next</p>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                {mentorName.split(' ')[0]} sets weekly availability and we generate 1:1
-                slots from it. Until then, the ₹99 group rooms are open.
-              </p>
-            </div>
+            <SlotPicker
+              mentorId={mentorId}
+              mentorName={mentorName}
+              price={price}
+              minutes={minutes}
+              signedIn={signedIn}
+            />
 
             {groupSessions.length > 0 && (
               <Button variant="group" full size="lg" onClick={() => setTab('group')}>

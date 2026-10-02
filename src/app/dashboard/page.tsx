@@ -10,7 +10,7 @@ import { SessionCard } from '@/components/shared/session-card'
 import { BookingRow } from '@/components/bookings/booking-row'
 import { EmptyState } from '@/components/shared/states'
 import { SectionHeading } from '@/components/shared/section-heading'
-import { getSessionUser } from '@/lib/session'
+import { requireStudent } from '@/lib/session'
 import { creditBalance, matchedMentors, myBookingsByTab } from '@/lib/queries/bookings'
 import { listGroupSessions } from '@/lib/queries/sessions'
 import { formatINR } from '@/lib/utils'
@@ -22,8 +22,7 @@ export const dynamic = 'force-dynamic'
 export default async function DashboardPage({
   searchParams,
 }: { searchParams: Promise<{ matched?: string }> }) {
-  const user = await getSessionUser()
-  if (!user) redirect('/signin?next=/dashboard')
+  const user = await requireStudent('/dashboard')
   if (!user.onboardingComplete) redirect('/onboarding')
 
   const { matched } = await searchParams

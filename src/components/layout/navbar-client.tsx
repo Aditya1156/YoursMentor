@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Bell, LogOut, Menu, Wallet, X } from 'lucide-react'
+import { Bell, IndianRupee, LogOut, Menu, Wallet, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/ui/avatar'
 import { Logo } from '@/components/shared/logo'
@@ -11,18 +11,52 @@ import { createClient } from '@/lib/supabase/client'
 import type { SessionUser } from '@/lib/session'
 import { cn, formatINR } from '@/lib/utils'
 
-const NAV = [
-  { href: '/mentors', label: 'Find Mentors' },
-  { href: '/sessions', label: 'Group Sessions (₹99)' },
-  { href: '/dashboard', label: 'Student Dashboard', authOnly: true },
-  { href: '/become-a-mentor', label: 'Become a Mentor' },
-] as const
+interface NavLink {
+  href: string
+  label: string
+}
+
+/**
+ * What each role sees. There is no shared list with flags on it, because the
+ * flags were the bug: "Become a Mentor" was being offered to mentors, and
+ * "Student Dashboard" to admins, while neither had a link to their own area.
+ *
+ * Recruiting belongs to people who have not joined yet. Once someone is a
+ * student, "Become a Mentor" stops being an invitation and starts being a
+ * suggestion that they are in the wrong place; it lives on the landing page
+ * and in the footer, where a curious student can still find it.
+ */
+const NAV_BY_ROLE: Record<'guest' | 'student' | 'mentor' | 'admin', readonly NavLink[]> = {
+  guest: [
+    { href: '/mentors', label: 'Find Mentors' },
+    { href: '/sessions', label: 'Group Sessions (₹99)' },
+    { href: '/become-a-mentor', label: 'Become a Mentor' },
+  ],
+  student: [
+    { href: '/dashboard', label: 'Dashboard' },
+    { href: '/mentors', label: 'Find Mentors' },
+    { href: '/sessions', label: 'Group Sessions (₹99)' },
+    { href: '/my-sessions', label: 'My Sessions' },
+  ],
+  mentor: [
+    { href: '/mentor', label: 'Dashboard' },
+    { href: '/mentor/sessions', label: 'My Sessions' },
+    { href: '/mentor/availability', label: 'Availability' },
+    { href: '/mentor/earnings', label: 'Earnings' },
+  ],
+  admin: [
+    { href: '/admin', label: 'Overview' },
+    { href: '/admin/mentors', label: 'Mentors' },
+    { href: '/admin/sessions', label: 'Sessions' },
+    { href: '/admin/coupons', label: 'Coupons' },
+  ],
+}
 
 export function NavbarClient({ user }: { user: SessionUser | null }) {
   const pathname = usePathname()
   const router = useRouter()
   const [open, setOpen] = useState(false)
-  const links = NAV.filter((l) => !('authOnly' in l && l.authOnly) || user)
+  const links = NAV_BY_ROLE[user?.role ?? 'guest']
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
 
@@ -59,10 +93,28 @@ export function NavbarClient({ user }: { user: SessionUser | null }) {
         <div className="flex items-center gap-2">
           {user ? (
             <>
-              <span className="hidden items-center gap-1.5 rounded-[var(--radius-pill)] border border-border px-3 py-1.5 text-xs font-semibold sm:inline-flex">
-                <Wallet className="size-3.5 text-primary" aria-hidden />
-                My Credits: {formatINR(user.creditsBalance)}
-              </span>
+              {/* Credits are a refund wallet: money that came back after a
+                  cancellation, spendable on another booking. That is a student's
+                  concern. A mentor is paid out, which is a different number in a
+                  different place, so they get a link to it instead. */}
+              {user.role === 'student' && (
+                <Link
+                  href="/dashboard"
+                  className="hidden items-center gap-1.5 rounded-[var(--radius-pill)] border border-border px-3 py-1.5 text-xs font-semibold hover:bg-surface-muted sm:inline-flex"
+                >
+                  <Wallet className="size-3.5 text-primary" aria-hidden />
+                  Credits: {formatINR(user.creditsBalance)}
+                </Link>
+              )}
+              {user.role === 'mentor' && (
+                <Link
+                  href="/mentor/earnings"
+                  className="hidden items-center gap-1.5 rounded-[var(--radius-pill)] border border-border px-3 py-1.5 text-xs font-semibold hover:bg-surface-muted sm:inline-flex"
+                >
+                  <IndianRupee className="size-3.5 text-primary" aria-hidden />
+                  Earnings
+                </Link>
+              )}
               <Link
                 href="/notifications"
                 className="relative hidden rounded-full p-2 text-muted-foreground hover:bg-surface-muted hover:text-foreground sm:block"
