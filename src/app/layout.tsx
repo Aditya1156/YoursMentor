@@ -18,14 +18,13 @@ export const metadata: Metadata = {
   },
   description:
     'YoursMentor.in connects students from Tier-2 and Tier-3 colleges with near-peer mentors who were exactly where they are. ₹99 group sessions and affordable 1:1 guidance.',
-  icons: { icon: '/brand/mark.png', apple: '/brand/mark.png' },
   openGraph: {
     type: 'website',
     siteName: 'YoursMentor.in',
     title: 'YoursMentor.in — Know What to Do Next.',
     description:
       'Book ₹99 group sessions and 1:1 calls with seniors from Tier-2 and Tier-3 colleges who already did what you are trying to do.',
-    images: ['/brand/logo-horizontal.png'],
+    images: ['/brand/og-mark.png'],
   },
 }
 

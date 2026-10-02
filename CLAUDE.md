@@ -79,8 +79,15 @@ exposed to Tailwind through `@theme inline`.
 **Never hardcode a colour, radius or font.** Use the semantic token (`bg-surface`,
 `text-muted-foreground`, `rounded-[var(--radius-lg)]`).
 
-Brand assets live in `public/brand/`: `mark.png` (the YM figure), `wordmark.png`,
-`logo-horizontal.png` and `logo-stacked.png`. The navbar and footer use the mark plus a
+Brand assets live in `public/brand/`: `mark.png` (the YM figure, transparent),
+`wordmark.png`, `logo-horizontal.png`, `logo-stacked.png` and `og-mark.png` (the social
+card). `favicon-source.svg` is the original file the mark was extracted from — it is not
+referenced by anything and can be deleted.
+
+The favicon comes from Next's app-router file convention: `src/app/icon.png` (32),
+`icon1.png` (192), `icon2.png` (512) and `apple-icon.png` (180). Next emits the
+`<link rel="icon">` tags itself, so **do not** add `metadata.icons` — that would override
+and silence them. The navbar and footer use the mark plus a
 live-text wordmark — "yours" in navy, "mentor.in" in brand blue — so it stays crisp and
 reflows at 360px. Use the raster lockups for emails and social cards.
 
