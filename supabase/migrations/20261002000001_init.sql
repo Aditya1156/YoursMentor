@@ -62,7 +62,8 @@ create table public.mentor_profiles (
   -- a field in its own right rather than the first line of the story.
   breakthrough_story    text check (char_length(breakthrough_story) <= 280),
 
-  current_role          text,
+  -- `current_role` is a reserved word in Postgres; this is the mentor's job.
+  current_position      text,
   company               text,
   country               text not null default 'India',
 
@@ -138,17 +139,25 @@ declare
   dob date := nullif(new.raw_user_meta_data ->> 'date_of_birth', '')::date;
   is_adult boolean := dob is not null
     and dob <= (current_date - interval '18 years');
+  derived text := coalesce(
+    nullif(trim(new.raw_user_meta_data ->> 'name'), ''),
+    nullif(trim(new.raw_user_meta_data ->> 'full_name'), ''),
+    split_part(new.email, '@', 1)
+  );
 begin
+  -- profiles.name requires 2 to 80 characters. A Google account with no
+  -- display name, or an address like a@gmail.com, would otherwise derive a
+  -- one-character name, trip the constraint, and fail the whole sign-up.
+  derived := left(trim(derived), 80);
+  if derived is null or char_length(derived) < 2 then
+    derived := 'New member';
+  end if;
   insert into public.profiles (
     id, name, avatar_url, role, date_of_birth, is_adult_confirmed, accepted_terms_at
   )
   values (
     new.id,
-    coalesce(
-      nullif(trim(new.raw_user_meta_data ->> 'name'), ''),
-      nullif(trim(new.raw_user_meta_data ->> 'full_name'), ''),
-      split_part(new.email, '@', 1)
-    ),
+    derived,
     new.raw_user_meta_data ->> 'avatar_url',
     coalesce((new.raw_user_meta_data ->> 'role')::user_role, 'student'),
     case when is_adult then dob end,

@@ -37,8 +37,15 @@ npm run dev        # http://localhost:3000
 npm run typecheck
 npm run lint
 npm run build
-npm run gate       # all four
+npm run gate       # typecheck + lint + build + db tests
+npm run db:test    # migrations and booking engine against a local Postgres
 ```
+
+`db:test` needs `brew install postgresql@16`. It spins up a throwaway cluster in
+`/tmp/ymp`, applies every migration from scratch and runs `supabase/tests/booking.test.sql`
+— 27 cases covering seat holds, refunds, auto-cancel, reviews, contact masking and the
+18+ gate. `supabase/tests/_supabase_stubs.sql` stands in for `auth.*` and `storage.*` so
+the real migrations run unmodified; it is never deployed.
 
 `.env.local` holds the Supabase URL and publishable key (gitignored). The
 `SUPABASE_SERVICE_ROLE_KEY` is still blank — needed from Week 3 for Razorpay webhooks,
@@ -185,7 +192,26 @@ and must never be imported into a Client Component.
 | Not yet applied | The migration has **not** been run against the cloud project — see below |
 | Placeholder | Every other route renders a stub naming its spec ID and week |
 | Mock data | `lib/mock-data.ts` still feeds the landing page. Replace when the mentors query lands. |
-| Next | Spec §11 Week 1 — M1 mentor application + Supabase Storage uploads; then P2 directory |
+| Next | UI for the engine below: P2 directory, P3 profile, M1 application, S1 quiz, then checkout |
+
+### The booking engine
+
+`supabase/migrations/2026100200000{2,3,4}` add sessions, bookings, payments, the credit
+ledger, reviews, reports, payouts, notifications and session chat.
+
+**Anything that moves a seat or money is a `security definer` function, not a table
+write.** `bookings`, `payments` and `credit_ledger` grant no INSERT or UPDATE to
+`authenticated` at all — the client calls `hold_seat()`, `cancel_booking()` or
+`leave_review()` and the database decides. That removes the whole class of "client posted
+a crafted row" bug, and it is why there is no booking logic in the app layer.
+
+`hold_seat()` takes `for update` on the session row, so concurrent attempts serialise.
+Verified under real parallel load: 12 students racing for 3 seats yields exactly 3
+granted, 9 refused. `seats_within_capacity` is the backstop if that is ever bypassed.
+
+Cron functions (`release_expired_holds`, `auto_cancel_under_minimum`,
+`complete_finished_sessions`) are called from `/api/cron/*` with the service-role client
+on a Vercel Cron schedule — not yet wired.
 
 ### Applying the migration
 
