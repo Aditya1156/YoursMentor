@@ -7,6 +7,7 @@ import { Avatar } from '@/components/ui/avatar'
 import { LocalTime } from '@/components/shared/local-time'
 import { CancelBookingButton } from '@/components/bookings/cancel-booking-button'
 import { JoinButton } from '@/components/bookings/join-button'
+import { RescheduleControl } from '@/components/bookings/reschedule-control'
 import { BOOKING_LABEL } from '@/lib/types'
 import type { BookingRowData } from '@/lib/queries/bookings'
 import { formatINR } from '@/lib/utils'
@@ -72,6 +73,14 @@ export function BookingRow({ booking }: { booking: BookingRowData }) {
 
         {booking.canCancel && (
           <CancelBookingButton bookingId={booking.id} refundable={booking.refundable} />
+        )}
+
+        {/* A 1:1 is two people and a time, so it can be renegotiated. A group
+            room cannot: moving it would drag everyone else along. */}
+        {s.type === 'one_on_one'
+          && booking.status === 'confirmed'
+          && new Date(s.startAt) > new Date() && (
+          <RescheduleControl sessionId={s.id} startAt={s.startAt} className="w-full sm:w-auto" />
         )}
 
         {booking.status === 'attended' && !booking.hasReview && (

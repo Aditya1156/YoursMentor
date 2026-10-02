@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/shared/states'
 import { LocalTime } from '@/components/shared/local-time'
+import { RescheduleControl } from '@/components/bookings/reschedule-control'
 import { mentorSessions } from '@/lib/queries/mentor-dashboard'
 import { formatINR } from '@/lib/utils'
 
@@ -68,7 +69,7 @@ export default async function MentorSessionsPage({
             const short = s.status === 'scheduled' && s.seatsBooked < s.minSeats
             return (
               <li key={s.id}>
-                <Card interactive className="flex flex-wrap items-center justify-between gap-3 p-4">
+                <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge tone={s.type === 'group' ? 'amber' : 'indigo'}>
@@ -84,11 +85,21 @@ export default async function MentorSessionsPage({
                       <LocalTime iso={s.startAt} />
                     </p>
                   </div>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href={`/mentor/sessions/${s.id}`}>
-                      {active.id === 'past' ? 'Attendance & notes' : 'Manage'}
-                    </Link>
-                  </Button>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* Only a 1:1 can be renegotiated: there is one student on
+                        the other end to agree with. */}
+                    {s.type === 'one_on_one'
+                      && s.status === 'scheduled'
+                      && s.seatsBooked > 0
+                      && new Date(s.startAt) > new Date() && (
+                      <RescheduleControl sessionId={s.id} startAt={s.startAt} />
+                    )}
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/mentor/sessions/${s.id}`}>
+                        {active.id === 'past' ? 'Attendance & notes' : 'Manage'}
+                      </Link>
+                    </Button>
+                  </div>
                 </Card>
               </li>
             )
