@@ -215,11 +215,11 @@ on a Vercel Cron schedule — not yet wired.
 
 ### Applying the migration
 
-Nothing in `supabase/migrations/` has run against `bmyzudohkgxdnifpyanv` yet. Either:
+Nothing in `supabase/migrations/` has run against the cloud project yet. Either:
 
 ```bash
 npm i -g supabase
-supabase link --project-ref bmyzudohkgxdnifpyanv
+supabase link --project-ref <your-project-ref>   # from the Supabase dashboard URL
 supabase db push
 ```
 
