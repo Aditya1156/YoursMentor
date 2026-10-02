@@ -14,6 +14,8 @@ const nextConfig: NextConfig = {
         : []),
       // Profile photos that come back from Google sign-in.
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
+      // YouTube poster frames for the click-to-load video facade.
+      { protocol: 'https', hostname: 'i.ytimg.com' },
     ],
   },
 }

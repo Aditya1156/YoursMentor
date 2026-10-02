@@ -1,30 +1,29 @@
 import Link from 'next/link'
 import {
   ArrowRight,
-  BadgeIndianRupee,
   Banknote,
   BookOpenCheck,
   Building2,
   CircleDollarSign,
   GraduationCap,
   Handshake,
-  MonitorPlay,
-  Quote,
   RefreshCcw,
   ShieldCheck,
   Sparkles,
   Users,
-  Video,
   CalendarDays,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Faq } from '@/components/landing/faq'
+import { Hero } from '@/components/landing/hero'
+import { TrustStrip } from '@/components/landing/trust-strip'
+import { FounderVideo } from '@/components/landing/founder-video'
+import { Reveal } from '@/components/shared/reveal'
 import { SectionHeading } from '@/components/shared/section-heading'
 import { MentorCard } from '@/components/shared/mentor-card'
 import { SessionCard } from '@/components/shared/session-card'
-import { Avatar } from '@/components/ui/avatar'
 import { EmptyState } from '@/components/shared/states'
 import type { MentorSummary, SessionSummary } from '@/lib/types'
 
@@ -134,96 +133,46 @@ const STEPS = [
 ]
 
 
-const TRUST_CHIPS = [
-  { icon: MonitorPlay, label: '100% On-Platform Video' },
-  { icon: RefreshCcw, label: 'Instant Refund Policy' },
-  { icon: BadgeIndianRupee, label: 'No ₹10k/month Guru Fees' },
-]
-
 /* ── page ────────────────────────────────────────────────────────────────── */
 
 export function LandingSections({
   mentors,
   sessions,
+  founderVideoId,
 }: {
   mentors: MentorSummary[]
   sessions: SessionSummary[]
+  founderVideoId?: string
 }) {
   return (
     <>
-      <Hero />
+      <Hero mentorCount={mentors.length} sessionCount={sessions.length} />
+      <TrustStrip />
       <RealityCheck />
       <Tracks />
       <FeaturedMentors mentors={mentors} />
       <UpcomingCohorts sessions={sessions} />
       <HowItWorks />
       <Faq />
-      <FounderNote />
+      <FounderVideo videoId={founderVideoId} />
     </>
-  )
-}
-
-function Hero() {
-  return (
-    <section className="bg-surface-muted">
-      <div className="container-page flex flex-col items-center gap-6 py-12 text-center sm:py-16 md:py-20">
-        <Badge tone="indigo" size="md">
-          <Sparkles aria-hidden />
-          Over 2,400+ students guided from Tier-2 &amp; Tier-3 colleges across India
-        </Badge>
-
-        <h1 className="max-w-4xl text-[1.75rem] leading-[1.15] sm:text-4xl md:text-5xl md:leading-[1.1]">
-          Learn from someone who was where you are —{' '}
-          <span className="text-primary">one step ahead.</span>
-        </h1>
-
-        <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-          Connect with relatable seniors from similar college tiers, hometowns and
-          languages. Book affordable ₹99 group sessions or focused 1:1 guidance with zero
-          fluff.
-        </p>
-
-        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
-          <Button size="lg" asChild full className="sm:w-auto">
-            <Link href="/mentors">
-              Find a Mentor <ArrowRight aria-hidden />
-            </Link>
-          </Button>
-          <Button size="lg" variant="outline" asChild full className="sm:w-auto">
-            <Link href="/sessions">
-              <BadgeIndianRupee className="text-accent" aria-hidden />
-              Join a ₹99 Group Session
-            </Link>
-          </Button>
-        </div>
-
-        <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-2">
-          {TRUST_CHIPS.map(({ icon: Icon, label }) => (
-            <li
-              key={label}
-              className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground"
-            >
-              <Icon className="size-4 text-subtle-foreground" aria-hidden />
-              {label}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
   )
 }
 
 function RealityCheck() {
   return (
     <section className="container-page py-14 md:py-20">
+      <Reveal>
       <SectionHeading
         eyebrow="The Reality Check"
         title="Why standard tech mentorship is broken for us"
         description="Students from non-metro engineering colleges don’t need ivory-tower advice. They need tactical, empathetic playbooks that work off-campus."
       />
+      </Reveal>
       <div className="mt-8 grid gap-4 md:grid-cols-3">
-        {PROBLEMS.map(({ icon: Icon, title, body, answer, answerNote }) => (
-          <Card key={title} className="flex flex-col p-5">
+        {PROBLEMS.map(({ icon: Icon, title, body, answer, answerNote }, i) => (
+          <Reveal key={title} delay={i * 90} sheen>
+          <Card className="flex h-full flex-col p-5">
             <Icon className="size-5 text-danger" aria-hidden />
             <Badge tone="danger" className="mt-3 self-start">
               Traditional Market
@@ -242,6 +191,7 @@ function RealityCheck() {
               </p>
             </div>
           </Card>
+          </Reveal>
         ))}
       </div>
     </section>
@@ -257,8 +207,9 @@ function Tracks() {
         description="Two specialised launch tracks designed specifically for Tier-2 and Tier-3 career bottlenecks."
       />
       <div className="mt-8 grid gap-4 lg:grid-cols-2">
-        {TRACKS.map((track) => (
-          <Card key={track.id} className="flex flex-col bg-surface-muted p-5 sm:p-6">
+        {TRACKS.map((track, i) => (
+          <Reveal key={track.id} delay={i * 110}>
+          <Card className="flex h-full flex-col bg-surface-muted p-5 sm:p-6">
             <div className="flex items-center justify-between gap-3">
               <Badge tone="indigo" size="md">
                 {track.label}
@@ -299,6 +250,7 @@ function Tracks() {
               </Link>
             </Button>
           </Card>
+          </Reveal>
         ))}
       </div>
     </section>
@@ -324,8 +276,10 @@ function FeaturedMentors({ mentors }: { mentors: MentorSummary[] }) {
 
       {mentors.length ? (
         <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {mentors.map((m) => (
-            <MentorCard key={m.id} mentor={m} />
+          {mentors.map((m, i) => (
+            <Reveal key={m.id} delay={i * 90}>
+              <MentorCard mentor={m} className="h-full" />
+            </Reveal>
           ))}
         </div>
       ) : (
@@ -367,8 +321,10 @@ function UpcomingCohorts({ sessions }: { sessions: SessionSummary[] }) {
         {sessions.length ? (
           <>
             <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {sessions.map((s) => (
-                <SessionCard key={s.id} session={s} />
+              {sessions.map((s, i) => (
+                <Reveal key={s.id} delay={i * 90}>
+                  <SessionCard session={s} className="h-full" />
+                </Reveal>
               ))}
             </div>
             <Button variant="outline" full className="mt-5" asChild>
@@ -407,8 +363,9 @@ function HowItWorks() {
         description="No sales rep calling you. No loan agreements. Start learning within minutes."
       />
       <ol className="mt-8 grid gap-4 md:grid-cols-3">
-        {STEPS.map(({ n, tone, title, body }) => (
+        {STEPS.map(({ n, tone, title, body }, i) => (
           <li key={n}>
+            <Reveal delay={i * 110}>
             <Card className="h-full p-5">
               <span
                 className={`flex size-9 items-center justify-center rounded-[var(--radius-md)] text-base font-extrabold ${toneClass[tone]}`}
@@ -420,6 +377,7 @@ function HowItWorks() {
                 {body}
               </p>
             </Card>
+            </Reveal>
           </li>
         ))}
       </ol>
@@ -428,51 +386,3 @@ function HowItWorks() {
 }
 
 
-function FounderNote() {
-  return (
-    <section className="container-page pb-6 pt-4 md:pb-10">
-      <Card className="bg-primary-soft p-5 sm:p-8">
-        <Quote className="size-7 text-primary opacity-40" aria-hidden />
-        <div className="mt-3 flex flex-col gap-5 md:flex-row md:items-start md:gap-7">
-          <div className="flex shrink-0 flex-col items-start gap-2 md:w-44">
-            <Avatar name="Aditya" size="xl" />
-            <p className="text-sm font-bold">Aditya</p>
-            <a
-              href="https://youtube.com/@refactorslife"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs font-semibold text-primary hover:underline"
-            >
-              @refactorslife
-            </a>
-          </div>
-
-          <div className="flex-1">
-            <blockquote className="flex flex-col gap-3 text-sm leading-relaxed text-ink-700">
-              <p>
-                &ldquo;I graduated from a private engineering college where mass recruiters
-                offered 3.25 LPA, and teachers told us that off-campus FAANG or Tier-1
-                product jobs were only meant for IITians. It was a complete lie.&rdquo;
-              </p>
-              <p>
-                &ldquo;YoursMentor was built with close friends for every student sitting in a
-                hostel room right now who feels anxious, left out or invisible. You don’t
-                need a ₹50,000 bootcamp. You just need a senior who has travelled that exact
-                road to say:{' '}
-                <em className="font-semibold not-italic text-foreground">
-                  here is the exact step I took. You can do this too.
-                </em>
-                &rdquo;
-              </p>
-            </blockquote>
-            <Button className="mt-5" asChild>
-              <Link href="/mentors">
-                <Video aria-hidden /> Find your senior today
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </Card>
-    </section>
-  )
-}

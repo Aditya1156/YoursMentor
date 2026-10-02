@@ -12,5 +12,11 @@ export default async function HomePage() {
     featuredMentors(3).catch(() => []),
     listGroupSessions({ limit: 3 }).catch(() => []),
   ])
-  return <LandingSections mentors={mentors} sessions={sessions} />
+  return (
+    <LandingSections
+      mentors={mentors}
+      sessions={sessions}
+      founderVideoId={process.env.NEXT_PUBLIC_FOUNDER_VIDEO_ID}
+    />
+  )
 }
