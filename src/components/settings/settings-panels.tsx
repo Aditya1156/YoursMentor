@@ -43,10 +43,13 @@ interface Profile {
 interface Prefs { reminders: boolean; summaries: boolean; product_news: boolean }
 
 export function SettingsPanels({
-  email, isGoogleOnly, avatarUrl, profile, emailPreferences, deletionRequestedAt,
+  email, isGoogleOnly, isMentor = false, avatarUrl, profile, emailPreferences,
+  deletionRequestedAt,
 }: {
   email: string
   isGoogleOnly: boolean
+  /** Mentors keep the learning fields, but they stop being the headline. */
+  isMentor?: boolean
   avatarUrl?: string
   profile: Profile
   emailPreferences: Prefs
@@ -174,7 +177,9 @@ export function SettingsPanels({
           {saved === 'profile' && <Badge tone="green"><Check aria-hidden /> Saved</Badge>}
         </div>
         <p className="-mt-2 text-xs text-muted-foreground">
-          These drive your matches, so keeping them current changes who you see.
+          {isMentor
+            ? 'Your account details. What students see is on your mentor profile above.'
+            : 'These drive your matches, so keeping them current changes who you see.'}
         </p>
 
         <AvatarUpload name={p.name} currentUrl={avatarUrl} />
@@ -222,6 +227,7 @@ export function SettingsPanels({
           </div>
         </Field>
 
+        {!isMentor && (
         <Field label="What you are working towards" htmlFor="goals">
           <div className="flex flex-wrap gap-2" id="goals">
             {GOALS.map((g) => (
@@ -231,6 +237,7 @@ export function SettingsPanels({
             ))}
           </div>
         </Field>
+        )}
 
         <label className="flex cursor-pointer items-start gap-2.5 text-sm text-muted-foreground">
           <Checkbox checked={p.firstGenGraduate}

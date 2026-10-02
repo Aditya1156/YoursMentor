@@ -57,6 +57,15 @@ export interface MentorSummary {
   country: string
   /** Only present on the matched list from the onboarding quiz. */
   matchReasons?: MatchReasons
+  /** What the card shows on its back — what they have actually been doing. */
+  lastSessionTitle?: string
+  lastSessionAt?: string
+  lastSessionAttendees?: number
+  nextSessionTitle?: string
+  nextSessionAt?: string
+  latestReview?: string
+  latestReviewRating?: number
+  latestReviewAuthor?: string
 }
 
 export interface MatchReasons {

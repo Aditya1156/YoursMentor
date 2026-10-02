@@ -322,6 +322,52 @@
   to { opacity: 1; transform: none; }
 }
 
+/* ---------------------------------------------------------------------------
+   Flip card
+
+   Both faces are stacked in the same grid cell, so the container takes the
+   height of the taller one and nothing jumps when it turns.
+
+   Under reduced motion the rotation is dropped and the faces cross-fade
+   instead — a card spinning in 3D is exactly the kind of movement that
+   setting exists to switch off.
+   --------------------------------------------------------------------------- */
+@layer utilities {
+  .flip {
+    perspective: 1400px;
+  }
+  .flip-inner {
+    display: grid;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .flip-inner > * {
+    grid-area: 1 / 1;
+    backface-visibility: hidden;
+  }
+  .flip-back {
+    transform: rotateY(180deg);
+  }
+  .flip[data-flipped='true'] .flip-inner {
+    transform: rotateY(180deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .flip-inner,
+    .flip-back,
+    .flip[data-flipped='true'] .flip-inner {
+      transform: none;
+      transition: opacity 0.2s linear;
+    }
+    .flip-inner > * {
+      backface-visibility: visible;
+    }
+    .flip-back { opacity: 0; pointer-events: none; }
+    .flip[data-flipped='true'] .flip-front { opacity: 0; pointer-events: none; }
+    .flip[data-flipped='true'] .flip-back { opacity: 1; pointer-events: auto; }
+  }
+}
+
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }

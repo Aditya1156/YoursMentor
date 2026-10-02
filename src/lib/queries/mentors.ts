@@ -24,6 +24,14 @@ const toMentor = (r: any): MentorSummary => ({
   ratingCount: r.rating_count ?? 0,
   sessionsCompleted: r.sessions_completed ?? 0,
   country: r.country ?? 'India',
+  lastSessionTitle: r.last_session_title ?? undefined,
+  lastSessionAt: r.last_session_at ?? undefined,
+  lastSessionAttendees: r.last_session_attendees ?? undefined,
+  nextSessionTitle: r.next_session_title ?? undefined,
+  nextSessionAt: r.next_session_at ?? undefined,
+  latestReview: r.latest_review ?? undefined,
+  latestReviewRating: r.latest_review_rating ?? undefined,
+  latestReviewAuthor: r.latest_review_author ?? undefined,
 })
 
 export interface MentorFilters {
