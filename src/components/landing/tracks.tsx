@@ -105,7 +105,7 @@ export function Tracks() {
 
                 <p
                   className={`relative text-xs font-bold uppercase tracking-[0.12em] ${
-                    dark ? 'text-[var(--cyan-300)]' : 'text-primary-soft-foreground'
+                    dark ? 'text-[var(--cyan-on-dark)]' : 'text-primary-soft-foreground'
                   }`}
                 >
                   {track.tag}

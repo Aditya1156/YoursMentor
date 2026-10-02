@@ -114,7 +114,7 @@ export default async function JoinPage() {
               { icon: MessagesSquare, text: 'Run group rooms or 1:1 — your call' },
             ].map((f) => (
               <li key={f.text} className="flex items-center gap-2.5 text-sm">
-                <f.icon className="size-4 shrink-0 text-[var(--cyan-300)]" aria-hidden />
+                <f.icon className="size-4 shrink-0 text-[var(--cyan-on-dark)]" aria-hidden />
                 <span className="text-white/90">{f.text}</span>
               </li>
             ))}

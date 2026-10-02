@@ -28,6 +28,9 @@
   --blue-900: #012d92;
 
   --cyan-300: #13dcfc; /* the brightest highlight on the Y */
+  /* #13DCFC reads 4.01:1 on the deep gradient's lightest stop — fine for an
+     icon at 3:1, under the floor for text. This is the text-safe cyan. */
+  --cyan-on-dark: #7bebfe;
   --cyan-400: #0caafd;
   --cyan-500: #0397ef;
 
@@ -213,6 +216,7 @@
   --color-cta-1on1-foreground: var(--cta-1on1-foreground);
 
   --color-cyan-300: var(--cyan-300);
+  --color-cyan-on-dark: var(--cyan-on-dark);
   --color-cyan-400: var(--cyan-400);
   --color-navy-800: var(--navy-800);
   --color-ink-700: var(--ink-700);

@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { CalendarCheck, Video, Wallet } from 'lucide-react'
 import { redirect } from 'next/navigation'
-import { AuthCard } from '@/components/auth/auth-card'
+import { AuthCard, AuthAside } from '@/components/auth/auth-card'
 import { SignInForm } from '@/components/auth/signin-form'
 import { getSessionUser, homeFor } from '@/lib/session'
 
@@ -28,6 +29,17 @@ export default async function SignInPage({
     <AuthCard
       title="Welcome back"
       subtitle="Sign in to see your upcoming sessions and book your next one."
+      aside={
+        <AuthAside
+          eyebrow="Welcome back"
+          title="Your sessions are waiting"
+          points={[
+            { icon: CalendarCheck, text: 'Everything you have booked, with the join button live 10 minutes before' },
+            { icon: Wallet, text: 'Any credits from a cancelled session, ready to spend' },
+            { icon: Video, text: 'Notes and next steps from every session you attended' },
+          ]}
+        />
+      }
       footer={
         <>
           New to YoursMentor?{' '}
