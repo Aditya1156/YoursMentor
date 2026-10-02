@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { AuthCard } from '@/components/auth/auth-card'
+import { RolePicker } from '@/components/auth/role-picker'
 import { SignUpForm } from '@/components/auth/signup-form'
 import { getSessionUser, homeFor } from '@/lib/session'
 
@@ -35,6 +36,9 @@ export default async function SignUpPage({
         </>
       }
     >
+      <div className="mb-5">
+        <RolePicker role={role} />
+      </div>
       <SignUpForm role={role} />
     </AuthCard>
   )

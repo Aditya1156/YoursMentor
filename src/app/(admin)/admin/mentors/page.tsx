@@ -1,11 +1,9 @@
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { UserCheck } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState, ErrorState } from '@/components/shared/states'
 import { ApplicationCard } from '@/components/admin/application-card'
 import { createClient } from '@/lib/supabase/server'
-import { getSessionUser } from '@/lib/session'
 
 export const metadata: Metadata = { title: 'Mentor approvals', robots: { index: false } }
 export const dynamic = 'force-dynamic'
@@ -16,10 +14,7 @@ const TABS = ['pending', 'approved', 'rejected', 'suspended'] as const
 export default async function AdminMentorsPage({
   searchParams,
 }: { searchParams: Promise<{ status?: string }> }) {
-  const user = await getSessionUser()
-  if (!user) redirect('/signin?next=/admin/mentors')
-  if (user.role !== 'admin') redirect('/')
-
+  // The (admin) layout has already checked the role.
   const { status: raw } = await searchParams
   const status = (TABS as readonly string[]).includes(raw ?? '') ? raw! : 'pending'
 
@@ -38,7 +33,7 @@ export default async function AdminMentorsPage({
   )
 
   return (
-    <div className="container-page flex flex-col gap-5 py-8 md:py-10">
+    <div className="flex flex-col gap-5">
       <div>
         <h1 className="text-2xl">Mentor approvals</h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
