@@ -17,6 +17,8 @@ export default async function PricingPage() {
     .from('plans')
     .select('code, name, description, price, group_sessions, one_on_ones, duration_days')
     .eq('active', true)
+    // The free trial is granted at signup, not bought, so it is not a column here.
+    .gt('price', 0)
     .order('price')
 
   /* eslint-disable @typescript-eslint/no-explicit-any */

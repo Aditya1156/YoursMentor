@@ -47,6 +47,7 @@ export function PlanCards({
   const router = useRouter()
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [coupon, setCoupon] = useState('')
 
   async function buy(code: string, price: number) {
     if (!signedIn) {
@@ -58,7 +59,11 @@ export function PlanCards({
     const res = await fetch('/api/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan: code, useCredits: credits >= price }),
+      body: JSON.stringify({
+        plan: code,
+        useCredits: credits >= price,
+        coupon: coupon.trim() || undefined,
+      }),
     })
     const data = await res.json()
     setBusy(null)
@@ -207,6 +212,27 @@ export function PlanCards({
           )
         })}
       </div>
+
+      {signedIn && (
+        <div className="mx-auto flex w-full max-w-sm items-end gap-2">
+          <div className="flex-1">
+            <label htmlFor="coupon" className="text-xs font-semibold">
+              Have a code?
+            </label>
+            <input
+              id="coupon"
+              value={coupon}
+              onChange={(e) => setCoupon(e.target.value.toUpperCase())}
+              placeholder="FIRSTMONTH"
+              maxLength={24}
+              className="mt-1 w-full rounded-[var(--radius-sm)] border border-border bg-surface px-3 py-2 text-sm font-semibold uppercase tracking-wide"
+            />
+          </div>
+          <p className="pb-2 text-xs text-subtle-foreground">
+            applied when you start a plan
+          </p>
+        </div>
+      )}
 
       <p className="text-center text-xs leading-relaxed text-subtle-foreground">
         Prices include all taxes. A plan pays for sessions automatically — you will
