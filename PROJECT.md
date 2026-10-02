@@ -213,6 +213,15 @@ Cron functions (`release_expired_holds`, `auto_cancel_under_minimum`,
 `complete_finished_sessions`) are called from `/api/cron/*` with the service-role client
 on a Vercel Cron schedule — not yet wired.
 
+### Making yourself an admin
+
+`profiles.role` is not writable by the app on purpose — a student who could set
+it would be one request away from the admin panel. Sign up normally, then:
+
+```bash
+./scripts/make-admin.sh you@example.com
+```
+
 ### Applying the migration
 
 Nothing in `supabase/migrations/` has run against the cloud project yet. Either:
