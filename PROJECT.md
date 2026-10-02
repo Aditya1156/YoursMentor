@@ -218,10 +218,13 @@ on a Vercel Cron schedule — not yet wired.
 Nothing in `supabase/migrations/` has run against the cloud project yet. Either:
 
 ```bash
-npm i -g supabase
-supabase link --project-ref <your-project-ref>   # from the Supabase dashboard URL
-supabase db push
+brew install supabase/tap/supabase
+supabase login            # opens a browser once
+./supabase/push.sh        # links and applies every migration
 ```
+
+`push.sh` also takes `SUPABASE_ACCESS_TOKEN=sbp_…` or `SUPABASE_DB_PASSWORD=…`
+if you would rather not sign in interactively.
 
 or paste `supabase/migrations/20261002000001_init.sql` into the SQL editor in the
 Supabase dashboard. Google sign-in also needs enabling under Authentication → Providers.

@@ -1,4 +1,4 @@
-project_id = "yoursmentor"
+project_id = "yoursmentor"   # local dev only; the cloud ref is passed to `supabase link`
 
 [api]
 enabled = true
