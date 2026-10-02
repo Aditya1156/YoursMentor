@@ -1,22 +1,11 @@
 import Link from 'next/link'
-import {
-  ArrowRight,
-  Banknote,
-  BookOpenCheck,
-  Building2,
-  CircleDollarSign,
-  GraduationCap,
-  Handshake,
-  RefreshCcw,
-  ShieldCheck,
-  Sparkles,
-  Users,
-  CalendarDays,
-} from 'lucide-react'
+import { ArrowRight, Sparkles, Users, CalendarDays } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Faq } from '@/components/landing/faq'
+import { RealityCheck } from '@/components/landing/reality-check'
+import { Tracks } from '@/components/landing/tracks'
 import { Hero } from '@/components/landing/hero'
 import { TrustStrip } from '@/components/landing/trust-strip'
 import { FounderVideo } from '@/components/landing/founder-video'
@@ -28,88 +17,6 @@ import { EmptyState } from '@/components/shared/states'
 import type { MentorSummary, SessionSummary } from '@/lib/types'
 
 /* ── section content ─────────────────────────────────────────────────────── */
-
-const PROBLEMS = [
-  {
-    icon: CircleDollarSign,
-    title: 'Expensive Industry "Gurus"',
-    body: 'Demanding ₹5,000 to ₹10,000 per month on subscription with recycled pre-recorded lectures and zero genuine personalised feedback.',
-    answer: '₹99 / session',
-    answerNote: 'Zero lock-ins, zero upfront bundles. Pay only for what you attend.',
-  },
-  {
-    icon: Building2,
-    title: 'Big-College Detachment',
-    body: 'Top-tier college seniors who never experienced campus eco-recruitment, mass recruiters, or sending 400 cold emails to get one interview.',
-    answer: 'Relatable Seniors',
-    answerNote:
-      'Seniors who cracked off-campus placements directly from Tier-2 and Tier-3 colleges.',
-  },
-  {
-    icon: Users,
-    title: 'The Network Void',
-    body: 'Zero active alumni support on campus. No direct channels for referrals, resume reviews, or honest salary expectations.',
-    answer: 'Instant Peer Network',
-    answerNote: 'Verified seniors in Bangalore, Hyderabad, Pune and MS graduates abroad.',
-  },
-]
-
-const TRACKS = [
-  {
-    id: 'first_job' as const,
-    label: 'Track 01',
-    tag: 'High Demand',
-    tone: 'green' as const,
-    title: 'First Job & Internship',
-    description:
-      'Navigate the harsh reality of off-campus hiring, cold outreach and breaking into Tier-1 tech products without elite campus credentials.',
-    features: [
-      {
-        icon: BookOpenCheck,
-        title: 'Off-Campus DSA & System Basics',
-        body: 'Focus strictly on high-frequency patterns asked in 2026 hiring rounds.',
-      },
-      {
-        icon: RefreshCcw,
-        title: 'Service-to-Product Switch',
-        body: 'How to escape the 3.5 LPA mass-recruiter trap within 12 to 18 months.',
-      },
-      {
-        icon: Sparkles,
-        title: 'Resume Roast & Cold Email Blueprints',
-        body: 'Tested ATS formats and direct founder outreach templates with a 40% reply rate.',
-      },
-    ],
-  },
-  {
-    id: 'abroad' as const,
-    label: 'Track 02',
-    tag: 'Pragmatic & Honest',
-    tone: 'amber' as const,
-    title: 'Going Abroad (Non-Wealthy Perspective)',
-    description:
-      'Realistic guidance for middle-class engineering students seeking Master’s degrees abroad without generational wealth or fancy consultants.',
-    features: [
-      {
-        icon: GraduationCap,
-        title: 'GRE & IELTS Zero-Tuition Self Prep',
-        body: 'Resources, schedule sheets and practice sets that cost under ₹2,000 total.',
-      },
-      {
-        icon: Banknote,
-        title: 'Collateral-Free Education Loans & ROI',
-        body: 'Public banks vs NBFC interest pitfalls, living-cost breakdowns and 1A/9A survival.',
-      },
-      {
-        icon: Handshake,
-        title: 'Peer University Shortlisting',
-        body: 'Bypass commission-driven agents pushing Tier-4 degree mills.',
-      },
-    ],
-    disclaimer:
-      'Peer advice only. YoursMentor mentors do not provide legal immigration or visa consulting.',
-  },
-]
 
 const STEPS = [
   {
@@ -156,104 +63,6 @@ export function LandingSections({
       <Faq />
       <FounderVideo videoId={founderVideoId} />
     </>
-  )
-}
-
-function RealityCheck() {
-  return (
-    <section className="container-page py-14 md:py-20">
-      <Reveal>
-      <SectionHeading
-        eyebrow="The Reality Check"
-        title="Why standard tech mentorship is broken for us"
-        description="Students from non-metro engineering colleges don’t need ivory-tower advice. They need tactical, empathetic playbooks that work off-campus."
-      />
-      </Reveal>
-      <div className="mt-8 grid gap-4 md:grid-cols-3">
-        {PROBLEMS.map(({ icon: Icon, title, body, answer, answerNote }, i) => (
-          <Reveal key={title} delay={i * 90} sheen>
-          <Card className="flex h-full flex-col p-5">
-            <Icon className="size-5 text-danger" aria-hidden />
-            <Badge tone="danger" className="mt-3 self-start">
-              Traditional Market
-            </Badge>
-            <h3 className="mt-2 text-base">{title}</h3>
-            <p className="mt-2 flex-1 text-[0.8125rem] leading-relaxed text-muted-foreground">
-              {body}
-            </p>
-            <div className="mt-4 rounded-[var(--radius-md)] bg-surface-muted p-3">
-              <p className="flex items-center gap-1.5 text-sm font-bold text-success">
-                <ShieldCheck className="size-4" aria-hidden />
-                {answer}
-              </p>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                {answerNote}
-              </p>
-            </div>
-          </Card>
-          </Reveal>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-function Tracks() {
-  return (
-    <section className="container-page py-14 md:py-20">
-      <SectionHeading
-        eyebrow="Focused Pathways"
-        title="Choose Your Path Forward"
-        description="Two specialised launch tracks designed specifically for Tier-2 and Tier-3 career bottlenecks."
-      />
-      <div className="mt-8 grid gap-4 lg:grid-cols-2">
-        {TRACKS.map((track, i) => (
-          <Reveal key={track.id} delay={i * 110}>
-          <Card className="flex h-full flex-col bg-surface-muted p-5 sm:p-6">
-            <div className="flex items-center justify-between gap-3">
-              <Badge tone="indigo" size="md">
-                {track.label}
-              </Badge>
-              <Badge tone={track.tone}>{track.tag}</Badge>
-            </div>
-            <h3 className="mt-4 text-xl">{track.title}</h3>
-            <p className="mt-2 text-[0.8125rem] leading-relaxed text-muted-foreground">
-              {track.description}
-            </p>
-
-            <ul className="mt-4 flex flex-1 flex-col gap-2.5">
-              {track.features.map(({ icon: Icon, title, body }) => (
-                <li
-                  key={title}
-                  className="flex gap-3 rounded-[var(--radius-md)] border border-border bg-surface p-3.5"
-                >
-                  <Icon className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
-                  <div>
-                    <p className="text-[0.8125rem] font-bold">{title}</p>
-                    <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-                      {body}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-
-            {track.disclaimer && (
-              <p className="mt-3 text-[0.6875rem] italic leading-relaxed text-subtle-foreground">
-                {track.disclaimer}
-              </p>
-            )}
-
-            <Button variant="soft" full className="mt-4" asChild>
-              <Link href={`/mentors?track=${track.id}`}>
-                Explore {track.label.replace('0', '')} Mentors <ArrowRight aria-hidden />
-              </Link>
-            </Button>
-          </Card>
-          </Reveal>
-        ))}
-      </div>
-    </section>
   )
 }
 
