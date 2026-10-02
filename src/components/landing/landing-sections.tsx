@@ -384,7 +384,7 @@ function UpcomingCohorts({ sessions }: { sessions: SessionSummary[] }) {
               title="The first cohort rooms are being scheduled"
               description="₹99 gets you a live seat with up to 14 other students. Create an account and we will email you when the first one opens."
               actionLabel="Create an account"
-              actionHref="/signup"
+              actionHref="/join"
             />
           </div>
         )}

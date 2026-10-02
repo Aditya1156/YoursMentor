@@ -100,7 +100,7 @@ export function NavbarClient({ user }: { user: SessionUser | null }) {
                 <Link href="/signin">Log in</Link>
               </Button>
               <Button size="sm" asChild>
-                <Link href="/signup">Get started</Link>
+                <Link href="/join">Get started</Link>
               </Button>
             </>
           )}

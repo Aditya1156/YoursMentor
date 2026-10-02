@@ -109,12 +109,23 @@
   --cta-1on1-hover: var(--blue-700);
   --cta-1on1-foreground: #ffffff;
 
-  /* ---- the logo's own gradient, for hero bands and the mark ------------ */
+  /* ---- the logo's own gradient, for decoration only -------------------- */
   --brand-gradient: linear-gradient(
     135deg,
     var(--cyan-300) 0%,
     var(--blue-600) 45%,
     var(--navy-800) 100%
+  );
+
+  /* The same ramp, but dark enough to put text on. The decorative gradient
+     above starts at #13DCFC, and white body copy over that end reads at
+     3.07:1 — under AA. Every stop here clears 4.5:1 for white and 3:1 for
+     the cyan accent, so a panel can carry copy anywhere along it. */
+  --brand-gradient-deep: linear-gradient(
+    135deg,
+    var(--blue-700) 0%,
+    var(--navy-700) 50%,
+    var(--navy-900) 100%
   );
 
   /* ---- shape ----------------------------------------------------------- */

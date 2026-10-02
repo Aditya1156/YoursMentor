@@ -31,7 +31,7 @@ export default async function SignInPage({
       footer={
         <>
           New to YoursMentor?{' '}
-          <Link href="/signup" className="font-semibold text-primary hover:underline">
+          <Link href="/join" className="font-semibold text-primary hover:underline">
             Create an account
           </Link>
         </>
