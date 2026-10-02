@@ -56,8 +56,12 @@ export const RULES = {
   deletionGraceDays: 30,
   /** mentor_earnings(): the platform's share of a session's price. */
   commissionPercent: 25,
-  /** Minimum age. V1 is adults only; there is no parental-consent flow yet. */
-  minimumAge: 18,
+  /**
+   * No minimum age is enforced. The gate was removed deliberately; see
+   * 20261002000028_remove_age_gate.sql for what was weighed. Nothing in the
+   * product checks an age, so nothing published may claim one.
+   */
+  minimumAge: null as number | null,
   /** Group sessions below this many seats are cancelled and everyone refunded. */
   groupMinimumSeats: 3,
 } as const

@@ -14,7 +14,7 @@ export async function GET(request: Request) {
   const { error } = await supabase.auth.exchangeCodeForSession(code)
   if (error) return NextResponse.redirect(`${origin}/signin?error=google`)
 
-  // Google never tells us a date of birth, so the 18+ gate is still open.
-  // The proxy routes to /complete-profile when it is.
+  // Straight through: there is no age gate to satisfy any more, so a Google
+  // sign-in lands where it was headed.
   return NextResponse.redirect(`${origin}${safeNext}`)
 }

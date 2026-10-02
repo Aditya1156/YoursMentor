@@ -28,13 +28,6 @@ export function ageInYears(value: string, now = new Date()): number | null {
   return age
 }
 
-export const dateOfBirthField = z
-  .string()
-  .min(1, 'Enter your date of birth.')
-  .refine((v) => !Number.isNaN(new Date(v).getTime()), 'Enter a valid date.')
-  .refine((v) => new Date(v) <= new Date(), 'That date is in the future.')
-  .refine((v) => (ageInYears(v) ?? -1) >= MIN_AGE, "We're only open to 18+ right now.")
-
 const mustBeChecked = (message: string) =>
   z.boolean().refine((v) => v === true, { message })
 
@@ -42,14 +35,6 @@ export const signupFormSchema = z.object({
   name: z.string().trim().min(2, 'Enter your name.').max(80, 'That name is too long.'),
   email: emailField,
   password: passwordField,
-  dateOfBirth: dateOfBirthField,
-  isAdultConfirmed: mustBeChecked('Please confirm you are 18 or older.'),
-  acceptedTerms: mustBeChecked('Please accept the Terms and Privacy Policy.'),
-})
-
-export const completeProfileSchema = z.object({
-  dateOfBirth: dateOfBirthField,
-  isAdultConfirmed: mustBeChecked('Please confirm you are 18 or older.'),
   acceptedTerms: mustBeChecked('Please accept the Terms and Privacy Policy.'),
 })
 

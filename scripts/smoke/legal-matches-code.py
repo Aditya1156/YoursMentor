@@ -59,9 +59,12 @@ ok("commission is 25% in mentor_earnings()",
    rule("commissionPercent") == 25 and "p_commission int default 25" in sql,
    f'legal.ts says {rule("commissionPercent")}%')
 
-ok("minimum age 18 matches the signup check",
-   rule("minimumAge") == 18 and "18 years" in sql,
-   f'legal.ts says {rule("minimumAge")}')
+# The gate was removed, so the only correct assertion is that nothing claims one.
+ok("no minimum age is enforced in the database",
+   "adult_needs_dob" not in sql.split("drop constraint if exists adult_needs_dob")[-1],
+   "constraint dropped in 20261002000028")
+ok("legal.ts records that there is no minimum age",
+   "minimumAge: null" in legal)
 
 ok("group minimum of 3 matches the sessions default",
    rule("groupMinimumSeats") == 3 and "min_seats          int not null default 3" in sql,
@@ -92,7 +95,10 @@ ok("refund page covers mentor no-show", "did not turn up" in refunds)
 ok("refund page covers under-filled group sessions", "3 students to run" in refunds)
 
 privacy = text("/privacy")
-ok("privacy page states 18+", "18 or older" in privacy)
+ok("privacy page does NOT claim an age limit the product does not enforce",
+   "must be 18" not in privacy and "18 or older" not in privacy)
+ok("privacy page tells a parent how to have a child's account removed",
+   "parent or guardian" in privacy and "deleted" in privacy)
 ok("privacy page says video is not recorded", "not recorded" in privacy)
 ok("privacy page states the 30-day deletion", "30 days" in privacy)
 ok("privacy page names the processors",

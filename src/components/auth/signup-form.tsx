@@ -20,8 +20,6 @@ export function SignUpForm({ role }: { role: 'student' | 'mentor' }) {
     name: '',
     email: '',
     password: '',
-    dateOfBirth: '',
-    isAdultConfirmed: false,
     acceptedTerms: false,
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -65,7 +63,6 @@ export function SignUpForm({ role }: { role: 'student' | 'mentor' }) {
         data: {
           name: parsed.data.name,
           role,
-          date_of_birth: parsed.data.dateOfBirth,
           accepted_terms: true,
         },
         emailRedirectTo: `${window.location.origin}/auth/confirm?next=${
@@ -155,35 +152,9 @@ export function SignUpForm({ role }: { role: 'student' | 'mentor' }) {
           />
         </Field>
 
-        <Field
-          label="Date of birth"
-          htmlFor="dateOfBirth"
-          error={errors.dateOfBirth}
-          hint="YoursMentor is open to 18+ only for now."
-          required
-        >
-          <Input
-            id="dateOfBirth"
-            type="date"
-            max={new Date().toISOString().slice(0, 10)}
-            autoComplete="bday"
-            invalid={!!errors.dateOfBirth}
-            value={values.dateOfBirth}
-            onChange={(e) => set('dateOfBirth', e.target.value)}
-          />
-        </Field>
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="flex cursor-pointer gap-2.5 text-[0.8125rem] leading-snug text-muted-foreground">
-            <Checkbox
-              checked={values.isAdultConfirmed}
-              onChange={(e) => set('isAdultConfirmed', e.target.checked)}
-            />
-            <span>I am 18 years old or older.</span>
-          </label>
-          <FieldError>{errors.isAdultConfirmed}</FieldError>
-
           <label className="flex cursor-pointer gap-2.5 text-[0.8125rem] leading-snug text-muted-foreground">
             <Checkbox
               checked={values.acceptedTerms}

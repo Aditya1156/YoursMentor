@@ -12,7 +12,6 @@ const PROTECTED_PREFIXES = [
   '/room',
   '/mentor',
   '/admin',
-  '/complete-profile',
 ]
 const AUTH_PAGES = ['/signin', '/signup', '/reset']
 
@@ -68,30 +67,20 @@ export async function proxy(request: NextRequest) {
   const atFrontDoor = path === '/'
   const atAuthPage = AUTH_PAGES.includes(path)
 
-  if (user && (atFrontDoor || atAuthPage || (needsAuth && path !== '/complete-profile'))) {
-    // One lookup serves all three decisions. The 18+ gate is enforced here as
-    // well as by the `adult_needs_dob` constraint in the database, because a
-    // Google sign-in arrives without a date of birth.
+  if (user && (atFrontDoor || atAuthPage)) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role, is_adult_confirmed, onboarding_complete')
+      .select('role, onboarding_complete')
       .eq('id', user.id)
       .single()
 
     if (profile) {
       const home = homeFor({
         role: profile.role,
-        isAdultConfirmed: profile.is_adult_confirmed,
         onboardingComplete: profile.onboarding_complete,
       })
-
       // Never redirect a page to itself.
-      if (home !== path) {
-        if (atFrontDoor || atAuthPage) return redirectTo(home)
-        if (!profile.is_adult_confirmed) {
-          return redirectTo('/complete-profile', `${path}${request.nextUrl.search}`)
-        }
-      }
+      if (home !== path) return redirectTo(home)
     }
   }
 

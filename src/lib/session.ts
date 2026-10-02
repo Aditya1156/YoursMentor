@@ -9,7 +9,6 @@ export interface SessionUser {
   role: 'student' | 'mentor' | 'admin'
   /** Shown under the name in the navbar, e.g. "Tier-3 College". */
   subtitle?: string
-  isAdultConfirmed: boolean
   onboardingComplete: boolean
   creditsBalance: number
   unreadNotifications: number
@@ -39,7 +38,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('name, avatar_url, role, college_tier, is_adult_confirmed, onboarding_complete')
+    .select('name, avatar_url, role, college_tier, onboarding_complete')
     .eq('id', user.id)
     .single()
 
@@ -71,7 +70,6 @@ export async function getSessionUser(): Promise<SessionUser | null> {
           : profile.college_tier
             ? TIER_LABEL[profile.college_tier]
             : undefined,
-    isAdultConfirmed: profile.is_adult_confirmed,
     onboardingComplete: profile.onboarding_complete,
     creditsBalance: typeof credits.data === 'number' ? credits.data : 0,
     unreadNotifications: unread.count ?? 0,

@@ -24,12 +24,18 @@ export default function Page() {
           meet the Digital Personal Data Protection Act, 2023.
         </p>
         <p>
-          <strong>You must be {RULES.minimumAge} or older to use YoursMentor.in.</strong>{' '}
-          We confirm your date of birth at sign-up. We do not yet have a verifiable
-          parental-consent process, so until we do we cannot accept accounts from
-          under-{RULES.minimumAge}s at all. If you believe a minor has created an account,
-          tell us at <a href={`mailto:${LEGAL.grievanceEmail}`}>{LEGAL.grievanceEmail}</a>{' '}
-          and we will remove it.
+          We do not ask your age and we do not restrict the platform by age. If you
+          are under 18, the law treats your personal data as a child&rsquo;s: a parent
+          or guardian can ask us what we hold about you and have it deleted, on your
+          behalf, at{' '}
+          <a href={`mailto:${LEGAL.grievanceEmail}`}>{LEGAL.grievanceEmail}</a>, and we
+          will act on that request without argument.
+        </p>
+        <p>
+          We do not profile anyone for advertising, and we do not track anyone across
+          other sites — neither adults nor children. If you are a parent who would
+          rather your child was not here, write to the same address and we will remove
+          the account.
         </p>
       </Section>
 
@@ -38,9 +44,8 @@ export default function Page() {
         <List
           items={[
             <>
-              <strong>To create your account</strong> — name, email address, date of birth.
-              The date of birth is used once, to confirm you are {RULES.minimumAge}+, and
-              then kept so we can show we checked.
+              <strong>To create your account</strong> — your name and email address.
+              That is all that is required.
             </>,
             <>
               <strong>To match you with mentors</strong> — college, course, graduating year,

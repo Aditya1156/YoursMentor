@@ -39,8 +39,8 @@ export default function Page() {
         <List
           items={[
             <>
-              You must be <strong>{RULES.minimumAge} or older</strong>. We confirm this at
-              sign-up and will close accounts that are not.
+              There is no minimum age. If you are under 18, a parent or guardian may
+              ask us to remove your account at any time and we will.
             </>,
             <>One account per person, with real details. An account in a false name may be
               suspended without refund.</>,
