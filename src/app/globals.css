@@ -284,6 +284,44 @@
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Auth route transition
+
+   Sign-in and sign-up are separate routes, so each mounts fresh. Rather than
+   a generic fade, the two halves slide in from the side they would have come
+   from if the layout had animated — the panel and the form swap places
+   between the two screens, so moving between them reads as the halves
+   trading sides rather than one page replacing another.
+
+   Mount animations rather than the View Transitions API: Next's client
+   navigation is same-document, so the @view-transition at-rule never fires
+   for it, and this works in every browser with no JavaScript at all.
+   --------------------------------------------------------------------------- */
+@layer utilities {
+  @media (prefers-reduced-motion: no-preference) {
+    .auth-in-left {
+      animation: auth-slide-left 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .auth-in-right {
+      animation: auth-slide-right 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    /* The form carries the content, so it lands a beat after the panel. */
+    .auth-in-delay {
+      animation-delay: 0.08s;
+    }
+  }
+}
+
+@keyframes auth-slide-left {
+  from { opacity: 0; transform: translate3d(-24px, 0, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes auth-slide-right {
+  from { opacity: 0; transform: translate3d(24px, 0, 0); }
+  to { opacity: 1; transform: none; }
+}
+
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }

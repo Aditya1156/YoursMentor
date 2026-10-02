@@ -113,9 +113,10 @@ export function SignUpForm({ role }: { role: 'student' | 'mentor' }) {
       <GoogleButton role={role} next={role === 'mentor' ? '/apply-to-mentor' : '/onboarding'} />
       <AuthDivider />
 
-      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
+      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-3.5">
         {formError && <ErrorBanner>{formError}</ErrorBanner>}
 
+        <div className="grid gap-3.5 sm:grid-cols-2">
         <Field label="Full name" htmlFor="name" error={errors.name} required>
           <Input
             id="name"
@@ -140,16 +141,14 @@ export function SignUpForm({ role }: { role: 'student' | 'mentor' }) {
           />
         </Field>
 
-        <Field
-          label="Password"
-          htmlFor="password"
-          error={errors.password}
-          hint="At least 8 characters."
-          required
-        >
+        </div>
+
+        <div className="grid gap-3.5 sm:grid-cols-2">
+        <Field label="Password" htmlFor="password" error={errors.password} required>
           <PasswordInput
             id="password"
             autoComplete="new-password"
+            placeholder="At least 8 characters"
             invalid={!!errors.password}
             value={values.password}
             onChange={(e) => set('password', e.target.value)}
@@ -173,9 +172,10 @@ export function SignUpForm({ role }: { role: 'student' | 'mentor' }) {
             onChange={(e) => set('dateOfBirth', e.target.value)}
           />
         </Field>
+        </div>
 
-        <div className="flex flex-col gap-2.5 pt-1">
-          <label className="flex cursor-pointer gap-2.5 text-sm leading-relaxed text-muted-foreground">
+        <div className="flex flex-col gap-2">
+          <label className="flex cursor-pointer gap-2.5 text-[0.8125rem] leading-snug text-muted-foreground">
             <Checkbox
               checked={values.isAdultConfirmed}
               onChange={(e) => set('isAdultConfirmed', e.target.checked)}
@@ -184,7 +184,7 @@ export function SignUpForm({ role }: { role: 'student' | 'mentor' }) {
           </label>
           <FieldError>{errors.isAdultConfirmed}</FieldError>
 
-          <label className="flex cursor-pointer gap-2.5 text-sm leading-relaxed text-muted-foreground">
+          <label className="flex cursor-pointer gap-2.5 text-[0.8125rem] leading-snug text-muted-foreground">
             <Checkbox
               checked={values.acceptedTerms}
               onChange={(e) => set('acceptedTerms', e.target.checked)}
@@ -204,7 +204,7 @@ export function SignUpForm({ role }: { role: 'student' | 'mentor' }) {
           <FieldError>{errors.acceptedTerms}</FieldError>
         </div>
 
-        <Button type="submit" full size="lg" disabled={loading} className="mt-1">
+        <Button type="submit" full size="lg" disabled={loading} className="mt-0.5">
           {loading && <Loader2 className="animate-spin" aria-hidden />}
           {loading ? 'Creating your account…' : 'Create account'}
         </Button>

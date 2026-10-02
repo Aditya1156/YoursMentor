@@ -36,35 +36,45 @@ export function AuthCard({
   asideSide?: 'left' | 'right'
 }) {
   return (
-    <div className="container-page py-8 md:py-12">
+    <div className="container-page py-8 md:py-10">
       <div
         className={
           aside
-            ? 'mx-auto grid max-w-5xl items-stretch gap-8 lg:grid-cols-2'
+            ? 'mx-auto grid max-w-5xl items-stretch gap-6 lg:grid-cols-2'
             : 'mx-auto max-w-md'
         }
       >
         {aside && (
           <div
-            className={`hidden lg:flex ${asideSide === 'right' ? 'lg:order-2' : 'lg:order-1'}`}
+            className={`hidden lg:flex ${
+              asideSide === 'right'
+                ? 'lg:order-2 auth-in-right'
+                : 'lg:order-1 auth-in-left'
+            }`}
           >
             {aside}
           </div>
         )}
 
         <div
-          className={`mx-auto flex w-full max-w-md flex-col justify-center ${
-            aside ? (asideSide === 'right' ? 'lg:order-1' : 'lg:order-2') : ''
+          className={`mx-auto flex w-full flex-col justify-center ${
+            aside ? 'max-w-lg lg:max-w-none' : 'max-w-md'
+          } ${
+            aside
+              ? asideSide === 'right'
+                ? 'lg:order-1 auth-in-left auth-in-delay'
+                : 'lg:order-2 auth-in-right auth-in-delay'
+              : 'auth-in-right'
           }`}
         >
-          <Card className="p-6 shadow-[var(--shadow-raised)] sm:p-8">
+          <Card className="p-6 shadow-[var(--shadow-raised)] sm:p-7">
             <h1 className="text-2xl">{title}</h1>
             {subtitle && (
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
                 {subtitle}
               </p>
             )}
-            <div className="mt-6">{children}</div>
+            <div className="mt-5">{children}</div>
           </Card>
 
           {footer && (
@@ -113,7 +123,7 @@ export function AuthAside({
 }) {
   return (
     <div
-      className="relative flex w-full flex-col justify-center overflow-hidden rounded-[var(--radius-xl)] border border-[var(--navy-800)] p-8 text-white"
+      className="relative flex w-full flex-col justify-center overflow-hidden rounded-[var(--radius-xl)] border border-[var(--navy-800)] p-7 text-white"
       style={{ background: 'var(--brand-gradient-deep)' }}
     >
       <span
@@ -132,7 +142,7 @@ export function AuthAside({
         </p>
         <h2 className="mt-2 text-2xl leading-tight text-white">{title}</h2>
 
-        <ul className="mt-6 flex flex-col gap-3.5">
+        <ul className="mt-5 flex flex-col gap-3">
           {points.map(({ icon: Icon, text }) => (
             <li key={text} className="flex items-start gap-2.5 text-sm">
               <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-black/25">
@@ -144,7 +154,7 @@ export function AuthAside({
         </ul>
 
         {quote && (
-          <figure className="mt-7 rounded-[var(--radius-md)] bg-black/25 p-4">
+          <figure className="mt-6 rounded-[var(--radius-md)] bg-black/25 p-4">
             <blockquote className="text-[0.8125rem] leading-relaxed text-white/90">
               &ldquo;{quote.text}&rdquo;
             </blockquote>
