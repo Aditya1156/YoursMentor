@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useSyncExternalStore } from 'react'
-import { Video } from 'lucide-react'
+import { RotateCcw, Video } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 /**
@@ -34,10 +34,16 @@ export function JoinButton({
     )
   }
 
+  // Past the start time, so the call is presumably already going. "Rejoin" is
+  // the more useful word then: someone whose browser just crashed needs to see
+  // that going back in is expected, not wonder whether they are starting
+  // something new. The room itself resumes without asking.
+  const label = state === 'live' ? 'Rejoin' : 'Join now'
+
   return (
     <Button variant="primary" size="sm" asChild>
       <Link href={`/room/${sessionId}`}>
-        <Video aria-hidden /> Join now
+        {state === 'live' ? <RotateCcw aria-hidden /> : <Video aria-hidden />} {label}
       </Link>
     </Button>
   )
@@ -48,5 +54,7 @@ function windowState(startAt: string, endAt: string, now: number) {
   const end = new Date(endAt).getTime()
   if (now > end) return 'over'
   if (now < start - 10 * 60_000) return 'early'
+  // Past the start time, so the call is presumably happening.
+  if (now >= start) return 'live'
   return 'open'
 }

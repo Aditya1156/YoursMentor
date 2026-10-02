@@ -8,6 +8,7 @@ import { EmptyState } from '@/components/shared/states'
 import { LocalTime } from '@/components/shared/local-time'
 import { RescheduleControl } from '@/components/bookings/reschedule-control'
 import { StartNowButton } from '@/components/bookings/start-now-button'
+import { JoinButton } from '@/components/bookings/join-button'
 import { mentorSessions } from '@/lib/queries/mentor-dashboard'
 import { formatINR } from '@/lib/utils'
 
@@ -97,6 +98,10 @@ export default async function MentorSessionsPage({
                         <StartNowButton sessionId={s.id} />
                         <RescheduleControl sessionId={s.id} startAt={s.startAt} />
                       </>
+                    )}
+                    {/* The mentor had no way into their own room from here. */}
+                    {s.status === 'scheduled' && (
+                      <JoinButton sessionId={s.id} startAt={s.startAt} endAt={s.endAt} />
                     )}
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/mentor/sessions/${s.id}`}>
