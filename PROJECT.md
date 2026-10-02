@@ -209,9 +209,18 @@ a crafted row" bug, and it is why there is no booking logic in the app layer.
 Verified under real parallel load: 12 students racing for 3 seats yields exactly 3
 granted, 9 refused. `seats_within_capacity` is the backstop if that is ever bypassed.
 
-Cron functions (`release_expired_holds`, `auto_cancel_under_minimum`,
-`complete_finished_sessions`) are called from `/api/cron/*` with the service-role client
-on a Vercel Cron schedule — not yet wired.
+Cron functions run from `/api/cron/*` with the service-role client, on the schedule in
+`vercel.json`:
+
+| Job | Every | Why |
+|---|---|---|
+| `release-holds` | 5 min | An abandoned checkout holds a seat nobody paid for |
+| `complete-sessions` | 15 min | Earnings and reviews both need a completed session |
+| `auto-cancel` | hourly | Acts on a six-hour window, so finer is wasted work |
+
+Vercel Cron signs each request with `CRON_SECRET` as a bearer token, compared in constant
+time. **Without that variable the routes refuse everything** — they move seats and money,
+so an open endpoint is not an acceptable default.
 
 ### Making yourself an admin
 

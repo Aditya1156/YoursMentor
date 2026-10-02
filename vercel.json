@@ -1,0 +1,7 @@
+{
+  "crons": [
+    { "path": "/api/cron/release-holds", "schedule": "*/5 * * * *" },
+    { "path": "/api/cron/complete-sessions", "schedule": "*/15 * * * *" },
+    { "path": "/api/cron/auto-cancel", "schedule": "0 * * * *" }
+  ]
+}
