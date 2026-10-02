@@ -331,7 +331,7 @@ function FeaturedMentors({ mentors }: { mentors: MentorSummary[] }) {
       ) : (
         <div className="mt-8">
           <EmptyState
-            icon={Users}
+            icon={<Users aria-hidden />}
             title="Our first mentors are being verified right now"
             description="Every mentor is reviewed by a person before they appear here. Join the list and we will tell you the moment the first sessions open."
           />
@@ -380,10 +380,11 @@ function UpcomingCohorts({ sessions }: { sessions: SessionSummary[] }) {
         ) : (
           <div className="mt-6">
             <EmptyState
-              icon={CalendarDays}
+              icon={<CalendarDays aria-hidden />}
               title="The first cohort rooms are being scheduled"
               description="₹99 gets you a live seat with up to 14 other students. Create an account and we will email you when the first one opens."
               actionLabel="Create an account"
+              actionHref="/signup"
             />
           </div>
         )}

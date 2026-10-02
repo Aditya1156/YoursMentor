@@ -81,7 +81,7 @@ export default async function MentorsPage({
         <ErrorState description="We could not load the mentor list. Check your connection and try again." />
       ) : !result || result.total === 0 ? (
         <EmptyState
-          icon={Users}
+          icon={<Users aria-hidden />}
           title={
             Object.values(filters).some((v) => v !== undefined && v !== false && v !== 1 && v !== 'recommended')
               ? 'No mentors match those filters yet'

@@ -41,6 +41,43 @@ export async function myBookings(): Promise<BookingSummary[]> {
   }))
 }
 
+const ACTIVE = new Set(['held', 'confirmed'])
+const CANCELLED = new Set([
+  'cancelled_by_student', 'cancelled_by_mentor', 'cancelled_auto', 'refunded',
+])
+
+/**
+ * Splits bookings into the three tabs and works out what each row can do.
+ * This lives here rather than in the page because deciding it needs the
+ * current time, and a component that reads the clock during render is impure
+ * — it can produce different output on two renders of the same props.
+ */
+export async function myBookingsByTab() {
+  const bookings = await myBookings()
+  const now = Date.now()
+  const ended = (b: BookingSummary) => new Date(b.session.endAt).getTime() <= now
+  const hoursAway = (b: BookingSummary) =>
+    (new Date(b.session.startAt).getTime() - now) / 3_600_000
+
+  const decorate = (b: BookingSummary) => ({
+    ...b,
+    canCancel: b.status === 'confirmed' && !ended(b),
+    /** Cancelling this far out returns credits (spec §7). */
+    refundable: hoursAway(b) >= 24,
+  })
+
+  return {
+    upcoming: bookings.filter((b) => ACTIVE.has(b.status) && !ended(b)).map(decorate),
+    past: bookings
+      .filter((b) => b.status === 'attended' || b.status === 'no_show_student' ||
+                     (ACTIVE.has(b.status) && ended(b)))
+      .map(decorate),
+    cancelled: bookings.filter((b) => CANCELLED.has(b.status)).map(decorate),
+  }
+}
+
+export type BookingRowData = Awaited<ReturnType<typeof myBookingsByTab>>['upcoming'][number]
+
 export async function getBooking(id: string): Promise<BookingSummary | null> {
   const supabase = await createClient()
   const { data } = await supabase.from('bookings').select(SELECT).eq('id', id).maybeSingle()
