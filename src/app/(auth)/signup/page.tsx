@@ -28,6 +28,7 @@ export default async function SignUpPage({
           ? 'Set up your account first — the application comes next and takes about 10 minutes.'
           : 'Book ₹99 group sessions and 1:1 calls with seniors who were exactly where you are.'
       }
+      asideSide="right"
       aside={
         role === 'mentor' ? (
           <AuthAside

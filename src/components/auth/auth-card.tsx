@@ -7,11 +7,18 @@ import { Logo } from '@/components/shared/logo'
 /**
  * Shared frame for every auth screen.
  *
- * On a wide screen it pairs the form with a brand panel, because an auth page
- * is the one place a visitor has stopped to read and the only thing on offer
- * is a form. The panel says what is on the other side of it. Below `lg` the
- * panel is dropped rather than stacked — on a phone it would push the form
- * below the fold, and nobody reads marketing copy on the way to logging in.
+ * On a wide screen the page is split in half: the form on one side, a panel
+ * saying what is on the other side of it on the other. An auth page is the
+ * one place a visitor has stopped to read, and a bare form wastes that.
+ *
+ * `asideSide` mirrors the two. Sign-in reads content then form; sign-up reads
+ * form then content. Swapping them means someone bouncing between the two
+ * screens sees the page change shape, so it is obvious they moved rather than
+ * that the same page re-rendered.
+ *
+ * Below `lg` the panel is dropped rather than stacked — on a phone it would
+ * push the form below the fold, and nobody reads marketing copy on their way
+ * to logging in.
  */
 export function AuthCard({
   title,
@@ -19,25 +26,37 @@ export function AuthCard({
   children,
   footer,
   aside,
+  asideSide = 'left',
 }: {
   title: string
   subtitle?: ReactNode
   children: ReactNode
   footer?: ReactNode
   aside?: ReactNode
+  asideSide?: 'left' | 'right'
 }) {
   return (
-    <div className="container-page py-8 md:py-14">
+    <div className="container-page py-8 md:py-12">
       <div
         className={
           aside
-            ? 'mx-auto grid max-w-4xl gap-8 lg:grid-cols-[1fr_minmax(0,26rem)] lg:items-center'
+            ? 'mx-auto grid max-w-5xl items-stretch gap-8 lg:grid-cols-2'
             : 'mx-auto max-w-md'
         }
       >
-        {aside && <div className="hidden lg:block">{aside}</div>}
+        {aside && (
+          <div
+            className={`hidden lg:flex ${asideSide === 'right' ? 'lg:order-2' : 'lg:order-1'}`}
+          >
+            {aside}
+          </div>
+        )}
 
-        <div className="mx-auto w-full max-w-md">
+        <div
+          className={`mx-auto flex w-full max-w-md flex-col justify-center ${
+            aside ? (asideSide === 'right' ? 'lg:order-1' : 'lg:order-2') : ''
+          }`}
+        >
           <Card className="p-6 shadow-[var(--shadow-raised)] sm:p-8">
             <h1 className="text-2xl">{title}</h1>
             {subtitle && (
@@ -94,12 +113,16 @@ export function AuthAside({
 }) {
   return (
     <div
-      className="relative overflow-hidden rounded-[var(--radius-xl)] border border-[var(--navy-800)] p-7 text-white"
+      className="relative flex w-full flex-col justify-center overflow-hidden rounded-[var(--radius-xl)] border border-[var(--navy-800)] p-8 text-white"
       style={{ background: 'var(--brand-gradient-deep)' }}
     >
       <span
         aria-hidden
-        className="pointer-events-none absolute -right-12 -top-12 size-48 rounded-full bg-white/10"
+        className="pointer-events-none absolute -right-14 -top-14 size-56 rounded-full bg-white/10"
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -bottom-20 -left-12 size-56 rounded-full bg-black/15"
       />
 
       <div className="relative">
